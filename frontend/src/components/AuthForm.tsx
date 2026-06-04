@@ -1,5 +1,5 @@
-import { useState, FormEvent } from "react"
 import styles from "./AuthForm.module.css"
+import { useState, FormEvent } from "react"
 
 interface Props {
   onLogin: (email: string, password: string) => void

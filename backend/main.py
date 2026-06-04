@@ -1,3 +1,6 @@
+
+from dotenv import load_dotenv
+load_dotenv()
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -11,7 +14,10 @@ from websocket_handler import interview_socket
 
 limiter = Limiter(key_func=get_remote_address)
 
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+ALLOWED_ORIGINS = os.environ.get(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000",
+).split(",")
 
 
 @asynccontextmanager
@@ -30,8 +36,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
