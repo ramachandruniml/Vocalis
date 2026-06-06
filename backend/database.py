@@ -1,16 +1,12 @@
-import os
-from motor.motor_asyncio import AsyncIOMotorClient
+from prisma import Prisma
 
-client: AsyncIOMotorClient = None
+db = Prisma()
 
 async def connect_db():
-    global client
-    client = AsyncIOMotorClient(os.environ["MONGO_URI"])
+    await db.connect()
 
-async def close_db():
-    global client
-    if client:
-        client.close()
+async def disconnect_db():
+    await db.disconnect()
 
-async def get_db():
-    return client["interviewcoach"]
+def get_db() -> Prisma:
+    return db

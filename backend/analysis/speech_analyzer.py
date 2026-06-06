@@ -8,7 +8,6 @@ FILLER_WORDS = {
     "literally", "actually", "so", "right", "okay"
 }
 
-
 def extract_features(transcript: str, duration_seconds: float) -> dict:
     words = transcript.lower().split()
     word_count = len(words)
@@ -33,24 +32,18 @@ def extract_features(transcript: str, duration_seconds: float) -> dict:
         "word_count": word_count,
     }
 
-
 def build_confidence_pipeline() -> Pipeline:
     return Pipeline([
         ("scaler", StandardScaler()),
         ("clf", LogisticRegression()),
     ])
 
-
 def score_confidence(features: dict) -> float:
-    """
-    Heuristic confidence score 0-100.
-    Replace with a trained sklearn model loaded via joblib in production.
-    """
     wpm = features["wpm"]
     filler_rate = features["filler_rate"]
     unique_ratio = features["unique_word_ratio"]
 
-    wpm_score = 100 - abs(wpm - 140) * 0.5      # ideal ~140 wpm
+    wpm_score = 100 - abs(wpm - 140) * 0.5
     filler_score = max(0, 100 - filler_rate * 500)
     vocab_score = unique_ratio * 100
 

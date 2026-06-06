@@ -1,39 +1,39 @@
-import os
 import tempfile
 import whisper
 from fastapi import WebSocket, WebSocketDisconnect
-from jose import JWTError, jwt
+from firebase_admin_setup import verify_firebase_token
 from analysis.speech_analyzer import extract_features, score_confidence
 from llm_feedback import get_llm_feedback
-
-SECRET_KEY = os.environ["SECRET_KEY"]
-ALGORITHM = "HS256"
+from database import get_db
 
 model = whisper.load_model("base")
 
-
 async def interview_socket(websocket: WebSocket, token: str):
-    # Authenticate before accepting
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-        if not user_id:
-            await websocket.close(code=1008)
-            return
-    except JWTError:
+        decoded = verify_firebase_token(token)
+        uid = decoded["uid"]
+    except Exception:
         await websocket.close(code=1008)
         return
 
     await websocket.accept()
+
+    db = get_db()
+    user = await db.user.find_unique(where={"firebaseUid": uid})
+    if not user:
+        await websocket.close(code=1008)
+        return
+
     audio_buffer = bytearray()
     duration_seconds = 0.0
-    CHUNK_THRESHOLD = 80_000  # ~5 seconds of audio
+    session_segments = []
+    CHUNK_THRESHOLD = 80_000
 
     try:
         while True:
             chunk = await websocket.receive_bytes()
             audio_buffer.extend(chunk)
-            duration_seconds += 1.0  # 1 chunk = ~1 second
+            duration_seconds += 1.0
 
             if len(audio_buffer) >= CHUNK_THRESHOLD:
                 transcript = await transcribe(bytes(audio_buffer))
@@ -41,19 +41,45 @@ async def interview_socket(websocket: WebSocket, token: str):
                 confidence = score_confidence(features)
                 feedback = await get_llm_feedback(transcript, features)
 
-                await websocket.send_json({
+                segment = {
                     "transcript": transcript,
                     "features": features,
                     "confidence_score": confidence,
                     "feedback": feedback,
-                })
+                }
+                session_segments.append(segment)
 
+                await websocket.send_json(segment)
                 audio_buffer.clear()
                 duration_seconds = 0.0
 
     except WebSocketDisconnect:
-        pass
+        if session_segments:
+            avg_confidence = sum(s["confidence_score"] for s in session_segments) / len(session_segments)
+            avg_wpm = sum(s["features"]["wpm"] for s in session_segments) / len(session_segments)
+            avg_filler = sum(s["features"]["filler_rate"] for s in session_segments) / len(session_segments)
+            total_words = sum(s["features"]["word_count"] for s in session_segments)
 
+            session = await db.session.create(data={
+                "userId": user.id,
+                "avgConfidence": avg_confidence,
+                "segmentCount": len(session_segments),
+                "totalWords": total_words,
+                "avgWpm": avg_wpm,
+                "avgFillerRate": avg_filler,
+            })
+
+            for seg in session_segments:
+                await db.segment.create(data={
+                    "sessionId": session.id,
+                    "transcript": seg["transcript"],
+                    "confidence": seg["confidence_score"],
+                    "wpm": seg["features"]["wpm"],
+                    "fillerRate": seg["features"]["filler_rate"],
+                    "fillerWords": seg["features"]["filler_words"],
+                    "uniqueWordRatio": seg["features"]["unique_word_ratio"],
+                    "feedback": seg["feedback"],
+                })
 
 async def transcribe(audio_bytes: bytes) -> str:
     with tempfile.NamedTemporaryFile(suffix=".webm", delete=True) as f:

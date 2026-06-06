@@ -1,0 +1,45 @@
+generator client {
+  provider  = "prisma-client-py"
+  interface = "asyncio"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  firebaseUid  String    @unique
+  email        String    @unique
+  displayName  String?
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+model Session {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  avgConfidence  Float
+  segmentCount   Int
+  totalWords     Int
+  avgWpm         Float
+  avgFillerRate  Float
+  createdAt      DateTime  @default(now())
+  segments       Segment[]
+}
+
+model Segment {
+  id              String   @id @default(uuid())
+  sessionId       String
+  session         Session  @relation(fields: [sessionId], references: [id])
+  transcript      String
+  confidence      Float
+  wpm             Float
+  fillerRate      Float
+  fillerWords     String[]
+  uniqueWordRatio Float
+  feedback        String
+  createdAt       DateTime @default(now())
+}
