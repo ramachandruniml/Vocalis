@@ -30,7 +30,7 @@ export function useAuth() {
     return unsub
   }, [])
 
-  const withError = async (fn: () => Promise<void>) => {
+  const withError = async (fn: () => Promise<any>) => {
     setError(null)
     try { await fn() }
     catch (e: any) { setError(e.message) }
