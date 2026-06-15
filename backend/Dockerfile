@@ -4,8 +4,11 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-local.txt ./
+# If a local requirements file is provided (requirements-local.txt), prefer it for faster local builds.
+RUN if [ -s requirements-local.txt ]; then \
+	pip install --no-cache-dir -r requirements-local.txt; \
+	else pip install --no-cache-dir -r requirements.txt; fi
 
 COPY . .
 

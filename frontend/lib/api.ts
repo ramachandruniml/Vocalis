@@ -21,3 +21,16 @@ export const getSessions = (token: string) =>
 
 export const getSession = (token: string, id: string) =>
   authFetch(`/api/sessions/${id}`, token)
+
+export interface InterviewQuestionRequest {
+  jobType: string
+  experienceLevel: string
+  focusAreas: string[]
+  count?: number
+}
+
+export const getInterviewQuestions = (token: string, payload: InterviewQuestionRequest) =>
+  authFetch("/api/interview/questions", token, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })

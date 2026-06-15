@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, Header
-from firebase_admin_setup import verify_firebase_token
-from database import get_db
+from .firebase_admin_setup import verify_firebase_token
+from .database import get_db
 
 async def get_current_user(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):

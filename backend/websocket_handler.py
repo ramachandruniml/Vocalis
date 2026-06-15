@@ -1,12 +1,11 @@
 import tempfile
-import whisper
 from fastapi import WebSocket, WebSocketDisconnect
-from firebase_admin_setup import verify_firebase_token
-from analysis.speech_analyzer import extract_features, score_confidence
-from llm_feedback import get_llm_feedback
-from database import get_db
+from .firebase_admin_setup import verify_firebase_token
+from .analysis.speech_analyzer import extract_features, score_confidence
+from .llm_feedback import get_llm_feedback
+from .database import get_db
 
-model = whisper.load_model("base")
+model = None
 
 async def interview_socket(websocket: WebSocket, token: str):
     try:
@@ -82,6 +81,15 @@ async def interview_socket(websocket: WebSocket, token: str):
                 })
 
 async def transcribe(audio_bytes: bytes) -> str:
+    global model
+    if model is None:
+        try:
+            import whisper
+            model = whisper.load_model("base")
+        except Exception as e:
+            print(f"Warning: whisper model unavailable: {e}")
+            return ""
+
     with tempfile.NamedTemporaryFile(suffix=".webm", delete=True) as f:
         f.write(audio_bytes)
         f.flush()

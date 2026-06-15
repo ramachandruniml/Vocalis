@@ -25,3 +25,9 @@ export interface Session {
   createdAt: string
   segments?: InterviewSegment[]
 }
+
+export interface InterviewQuestionsResponse {
+  jobType: string
+  experienceLevel: string
+  questions: string[]
+}
