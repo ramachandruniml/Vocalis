@@ -1,5 +1,6 @@
 "use client"
-import { useState, type FormEvent } from "react"
+import { useState, useEffect, type FormEvent } from "react"
+import WaterBackground from "@/components/WaterBackground"
 
 interface Props {
   onEmail:  (email: string, password: string, mode: "login" | "register") => void
@@ -9,9 +10,16 @@ interface Props {
 }
 
 export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
-  const [mode, setMode]       = useState<"login" | "register">("login")
-  const [email, setEmail]     = useState("")
+  const [mode, setMode]         = useState<"login" | "register">("login")
+  const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
+  const [mouse, setMouse]       = useState({ x: -9999, y: -9999 })
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => setMouse({ x: e.clientX, y: e.clientY })
+    window.addEventListener("mousemove", handler)
+    return () => window.removeEventListener("mousemove", handler)
+  }, [])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -19,21 +27,46 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6">
-      <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8 animate-fade-up">
+    <div className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden">
+      {/* Animated water canvas */}
+      <WaterBackground />
+
+      {/* Cursor glow */}
+      <div
+        className="fixed pointer-events-none rounded-full"
+        style={{
+          left: mouse.x,
+          top: mouse.y,
+          width: 320,
+          height: 320,
+          transform: "translate(-50%, -50%)",
+          background: "radial-gradient(circle, rgba(125,211,252,0.07) 0%, transparent 70%)",
+          zIndex: 1,
+          transition: "left 0.06s linear, top 0.06s linear",
+        }}
+      />
+
+      {/* Card */}
+      <div
+        className="relative w-full max-w-sm glass-strong rounded-2xl p-8 animate-fade-up"
+        style={{ zIndex: 10 }}
+      >
+        {/* Logo */}
         <div className="text-center mb-8">
-          <span className="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-accent text-[#0a0a0a] font-display font-black text-sm mb-4">
+          <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl btn-accent font-display font-black text-sm mb-4">
             VC
           </span>
-          <h1 className="font-display font-bold text-xl text-zinc-100">Vocalis</h1>
-          <p className="text-xs text-zinc-500 mt-1 font-mono">AI-powered mock interviewer</p>
+          <h1 className="font-display font-bold text-xl text-[#e0f2fe]">Vocalis</h1>
+          <p className="text-xs font-mono mt-1" style={{ color: "rgba(125,211,252,0.5)" }}>
+            AI-powered mock interviewer
+          </p>
         </div>
 
         {/* Google Sign In */}
         <button
           onClick={onGoogle}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 py-2.5 rounded-lg border border-border bg-panel text-zinc-300 text-sm font-mono hover:border-zinc-600 transition-colors mb-6 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl btn-ghost font-mono text-sm mb-6 disabled:opacity-40"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -45,23 +78,31 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-zinc-600 font-mono">or</span>
-          <div className="flex-1 h-px bg-border" />
+          <div className="flex-1 h-px" style={{ background: "rgba(125,211,252,0.12)" }} />
+          <span className="text-xs font-mono" style={{ color: "rgba(125,211,252,0.35)" }}>or</span>
+          <div className="flex-1 h-px" style={{ background: "rgba(125,211,252,0.12)" }} />
         </div>
 
         {/* Tab toggle */}
-        <div className="flex rounded-lg border border-border overflow-hidden mb-5">
+        <div
+          className="flex rounded-xl overflow-hidden mb-5"
+          style={{ border: "1px solid rgba(125,211,252,0.12)" }}
+        >
           {(["login", "register"] as const).map((m) => (
             <button
               key={m}
               type="button"
               onClick={() => setMode(m)}
-              className={`flex-1 py-2 text-xs font-mono transition-colors ${
+              className="flex-1 py-2 text-xs font-mono transition-all"
+              style={
                 mode === m
-                  ? "bg-accent/10 text-accent border-b border-accent"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
+                  ? {
+                      background: "rgba(125,211,252,0.1)",
+                      color: "#7dd3fc",
+                      borderBottom: "1px solid #7dd3fc",
+                    }
+                  : { color: "rgba(125,211,252,0.4)" }
+              }
             >
               {m === "login" ? "Sign in" : "Register"}
             </button>
@@ -70,7 +111,7 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-zinc-500 uppercase tracking-widest font-mono">Email</label>
+            <label className="label-mono">Email</label>
             <input
               type="email"
               value={email}
@@ -78,12 +119,12 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
               placeholder="you@example.com"
               required
               autoComplete="email"
-              className="bg-panel border border-border rounded-lg px-3 py-2.5 text-sm text-zinc-100 font-mono placeholder:text-zinc-700 focus:outline-none focus:border-accent-dim transition-colors"
+              className="input-blue rounded-xl px-3 py-2.5 text-sm font-mono"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-zinc-500 uppercase tracking-widest font-mono">Password</label>
+            <label className="label-mono">Password</label>
             <input
               type="password"
               value={password}
@@ -92,12 +133,13 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
               required
               minLength={8}
               autoComplete={mode === "login" ? "current-password" : "new-password"}
-              className="bg-panel border border-border rounded-lg px-3 py-2.5 text-sm text-zinc-100 font-mono placeholder:text-zinc-700 focus:outline-none focus:border-accent-dim transition-colors"
+              className="input-blue rounded-xl px-3 py-2.5 text-sm font-mono"
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-400 font-mono bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+            <p className="text-xs font-mono rounded-xl px-3 py-2"
+               style={{ color: "#f87171", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
               {error}
             </p>
           )}
@@ -105,10 +147,11 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 py-2.5 bg-accent text-[#0a0a0a] rounded-lg font-display font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-h-[42px]"
+            className="mt-1 py-2.5 rounded-xl btn-accent font-display text-sm flex items-center justify-center min-h-[42px]"
           >
             {loading
-              ? <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ? <span className="w-4 h-4 border-2 rounded-full animate-spin"
+                      style={{ borderColor: "rgba(3,16,30,0.2)", borderTopColor: "#03101e" }} />
               : mode === "login" ? "Sign in" : "Create account"}
           </button>
         </form>

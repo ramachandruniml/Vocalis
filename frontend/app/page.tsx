@@ -14,8 +14,11 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <span className="w-6 h-6 border-2 border-zinc-700 border-t-accent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#05101e] flex items-center justify-center">
+        <span
+          className="w-6 h-6 border-2 rounded-full animate-spin"
+          style={{ borderColor: "rgba(125,211,252,0.2)", borderTopColor: "#7dd3fc" }}
+        />
       </div>
     )
   }

@@ -2,18 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-syne: 'Syne', sans-serif;
+  --font-space: 'Space Grotesk', sans-serif;
   --font-dm-mono: 'DM Mono', monospace;
+  --bg: #05101e;
+  --accent: #7dd3fc;
+  --border: rgba(125, 211, 252, 0.15);
 }
 
 body {
-  background: #0a0a0a;
-  color: #f0ede8;
+  background: var(--bg);
+  color: #d4eeff;
+}
+
+/* Glassmorphism card */
+.glass {
+  background: rgba(8, 24, 50, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(125, 211, 252, 0.12);
+  box-shadow:
+    0 4px 32px rgba(0, 80, 200, 0.08),
+    inset 0 1px 0 rgba(125, 211, 252, 0.08);
+}
+
+.glass-strong {
+  background: rgba(6, 18, 40, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  box-shadow:
+    0 8px 48px rgba(0, 60, 180, 0.18),
+    inset 0 1px 0 rgba(125, 211, 252, 0.12);
+}
+
+/* Input focus glow */
+.input-blue {
+  background: rgba(5, 15, 35, 0.6);
+  border: 1px solid rgba(125, 211, 252, 0.15);
+  color: #d4eeff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-blue::placeholder {
+  color: rgba(125, 211, 252, 0.3);
+}
+.input-blue:focus {
+  outline: none;
+  border-color: rgba(125, 211, 252, 0.5);
+  box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.08);
+}
+
+/* Accent button */
+.btn-accent {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+  color: #03101e;
+  font-weight: 700;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);
+}
+.btn-accent:hover {
+  opacity: 0.92;
+  box-shadow: 0 6px 28px rgba(56, 189, 248, 0.5);
+}
+.btn-accent:active {
+  transform: scale(0.97);
+}
+.btn-accent:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Ghost button */
+.btn-ghost {
+  background: transparent;
+  color: rgba(125, 211, 252, 0.7);
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.btn-ghost:hover {
+  color: #7dd3fc;
+  border-color: rgba(125, 211, 252, 0.45);
+  background: rgba(125, 211, 252, 0.06);
+}
+
+/* Section label */
+.label-mono {
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(125, 211, 252, 0.5);
 }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(125, 211, 252, 0.2); border-radius: 2px; }
+
+/* Cursor ripple dot that follows mouse */
+#cursor-glow {
+  position: fixed;
+  pointer-events: none;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.06) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: left 0.08s linear, top 0.08s linear;
+  z-index: 1;
+}
