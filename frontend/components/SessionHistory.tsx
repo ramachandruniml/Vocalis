@@ -21,7 +21,7 @@ export default function SessionHistory({ sessions }: Props) {
               {new Date(s.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>
             <p className="text-sm text-zinc-300 font-mono">
-              {s.segmentCount} segments · {s.totalWords} words · {Math.round(s.avgWpm)} WPM
+              {s.segmentCount} segments / {s.totalWords} words / {Math.round(s.avgWpm)} WPM
             </p>
           </div>
           <div className="flex items-center gap-2">

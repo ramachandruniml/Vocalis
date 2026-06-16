@@ -1,24 +1,22 @@
 import tempfile
 from fastapi import WebSocket, WebSocketDisconnect
-from .firebase_admin_setup import verify_firebase_token
-from .analysis.speech_analyzer import extract_features, score_confidence
-from .llm_feedback import get_llm_feedback
-from .database import get_db
+from firebase_admin_setup import verify_firebase_token
+from analysis.speech_analyzer import extract_features, score_confidence
+from llm_feedback import get_llm_feedback
+from auth import ensure_user_from_token
 
 model = None
 
 async def interview_socket(websocket: WebSocket, token: str):
     try:
         decoded = verify_firebase_token(token)
-        uid = decoded["uid"]
     except Exception:
         await websocket.close(code=1008)
         return
 
     await websocket.accept()
 
-    db = get_db()
-    user = await db.user.find_unique(where={"firebaseUid": uid})
+    user = await ensure_user_from_token(decoded)
     if not user:
         await websocket.close(code=1008)
         return
@@ -47,7 +45,6 @@ async def interview_socket(websocket: WebSocket, token: str):
                     "feedback": feedback,
                 }
                 session_segments.append(segment)
-
                 await websocket.send_json(segment)
                 audio_buffer.clear()
                 duration_seconds = 0.0

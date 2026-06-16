@@ -15,22 +15,19 @@ def init_firebase():
                 _firebase_initialized = True
             except Exception as e:
                 print(f"Warning: Firebase initialization failed: {e}")
-                print("Continuing without Firebase - auth will be disabled")
                 _firebase_initialized = True
         else:
             print(f"Warning: Firebase service account file not found: {cred_path}")
-            print("Continuing without Firebase - auth will be disabled")
             _firebase_initialized = True
 
 def verify_firebase_token(id_token: str) -> dict:
     init_firebase()
     if not firebase_admin._apps:
-        # Firebase not initialized, return mock user for development
-        return {"uid": "dev-user", "email": "dev@example.com"}
+        if os.environ.get("ALLOW_DEV_AUTH", "false").lower() == "true":
+            return {"uid": "dev-user", "email": "dev@example.com", "name": "Development User"}
+        raise ValueError("Firebase Admin is not initialized")
     try:
-        decoded = auth.verify_id_token(id_token)
-        return decoded
+        return auth.verify_id_token(id_token)
     except Exception as e:
-        # Return mock user for development if token verification fails
         print(f"Warning: Token verification failed: {e}")
-        return {"uid": "dev-user", "email": "dev@example.com"}
+        raise

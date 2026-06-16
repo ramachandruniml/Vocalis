@@ -35,7 +35,7 @@ export function useAudioCapture(
         try { onSegment({ ...JSON.parse(e.data), timestamp: Date.now() }) }
         catch {}
       }
-      ws.onerror = () => setError("WebSocket error — is the backend running?")
+      ws.onerror = () => setError("WebSocket error - is the backend running?")
       ws.onclose = () => setRecording(false)
       socketRef.current = ws
 

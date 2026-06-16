@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from ..auth import get_current_user
-from ..database import get_db
-from ..llm_feedback import generate_interview_questions
+from auth import get_current_user
+from database import get_db
+from llm_feedback import generate_interview_questions
 
 router = APIRouter()
 

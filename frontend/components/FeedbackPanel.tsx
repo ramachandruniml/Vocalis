@@ -7,7 +7,7 @@ export default function FeedbackPanel({ segments }: Props) {
   if (segments.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-zinc-600 text-sm font-mono">
-        Start speaking — analysis appears here.
+        Start speaking - analysis appears here.
       </div>
     )
   }

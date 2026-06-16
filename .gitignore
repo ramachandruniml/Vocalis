@@ -25,15 +25,31 @@ dist-ssr
 
 # Python
 venv/
+.venv/
+backend/venv/
 __pycache__/
 *.pyc
 *.pyo
-.env
+*.db
+*.sqlite
+*.sqlite3
 
 # Node
 node_modules/
 dist/
-.env.local
+.next/
+out/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+*service-account*.json
+*firebase-service-account*.json
+firebase-service-account.json
 
 # Docker
 *.log
