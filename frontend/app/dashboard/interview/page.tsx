@@ -6,10 +6,32 @@ import { useAudioCapture } from "@/hooks/useAudioCapture"
 import { getInterviewQuestions } from "@/lib/api"
 import Waveform from "@/components/Waveform"
 import FeedbackPanel from "@/components/FeedbackPanel"
-import WaterBackground from "@/components/WaterBackground"
 import type { InterviewQuestionsResponse, InterviewSegment } from "@/types"
 
-const inputCls = "input-blue rounded-xl px-3 py-2.5 text-sm font-mono w-full"
+const labelStyle: React.CSSProperties = {
+  fontSize: "11px", fontWeight: 600, color: "#9ca3af",
+  letterSpacing: "0.08em", textTransform: "uppercase",
+}
+
+const inputStyle: React.CSSProperties = {
+  display: "block", width: "100%",
+  padding: "10px 14px",
+  border: "1.5px solid #e5e7eb",
+  borderRadius: "10px",
+  fontSize: "14px",
+  color: "#0d0d0d",
+  background: "#fff",
+  outline: "none",
+  boxSizing: "border-box",
+}
+
+const card: React.CSSProperties = {
+  background: "#fff",
+  borderRadius: "16px",
+  padding: "20px",
+  border: "1px solid #f0f0f0",
+  boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
+}
 
 export default function InterviewPage() {
   const { user, token, loading } = useAuth()
@@ -58,61 +80,76 @@ export default function InterviewPage() {
   }, [generateQuestions, questionLoading, questions.length, token])
 
   return (
-    <div className="relative min-h-screen bg-[#05101e] flex flex-col overflow-hidden">
-      <WaterBackground />
+    <div style={{ minHeight: "100vh", background: "#f5f5f7", display: "flex", flexDirection: "column" }}>
 
       {/* Header */}
-      <header
-        className="relative border-b px-6 py-4 flex items-center justify-between"
-        style={{ zIndex: 10, background: "rgba(5,16,30,0.7)", backdropFilter: "blur(12px)", borderColor: "rgba(125,211,252,0.1)" }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg btn-accent font-display font-black text-xs">VC</span>
-          <span className="font-display font-bold text-[#e0f2fe]">Vocalis</span>
+      <header style={{
+        background: "#fff",
+        borderBottom: "1px solid #e5e7eb",
+        padding: "0 24px",
+        height: "60px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <svg width="28" height="20" viewBox="0 0 32 22" aria-hidden>
+            <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#4f46e5"/>
+          </svg>
+          <span style={{ fontWeight: 600, fontSize: "16px", color: "#111" }}>Vocalis</span>
           {recording && (
-            <span className="flex items-center gap-1.5 text-xs text-red-400 font-mono animate-pulse-slow">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
+            <span className="flex items-center gap-1.5 animate-pulse" style={{ fontSize: "12px", color: "#ef4444", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
               LIVE
             </span>
           )}
         </div>
         <button
           onClick={() => router.push("/dashboard")}
-          className="text-xs font-mono btn-ghost rounded-lg px-3 py-1.5"
+          style={{
+            fontSize: "13px", fontWeight: 500, color: "#6b7280",
+            background: "none", border: "1px solid #e5e7eb",
+            borderRadius: "8px", padding: "6px 14px", cursor: "pointer",
+          }}
         >
           Back to dashboard
         </button>
       </header>
 
-      <div className="relative flex-1 grid grid-cols-1 lg:grid-cols-[1fr_420px]" style={{ zIndex: 10 }}>
+      {/* Two-column body */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px]" style={{ flex: 1 }}>
+
         {/* Left column */}
-        <div className="p-8 flex flex-col gap-8" style={{ borderRight: "1px solid rgba(125,211,252,0.08)" }}>
+        <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px", borderRight: "1px solid #e5e7eb" }}>
+
           <div>
-            <h1 className="font-display font-bold text-xl text-[#e0f2fe] mb-1">Practice Interview</h1>
-            <p className="text-sm font-mono" style={{ color: "rgba(125,211,252,0.5)" }}>
-              Choose any job type, generate questions, then answer out loud.
-            </p>
+            <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#0d0d0d", margin: "0 0 4px" }}>Practice Interview</h1>
+            <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>Choose a job type, generate questions, then answer out loud.</p>
           </div>
 
           {/* Config panel */}
-          <div className="glass rounded-2xl p-5 grid gap-4">
-            <div className="grid gap-4 sm:grid-cols-[1fr_150px]">
-              <label className="flex flex-col gap-1.5">
-                <span className="label-mono">Job type</span>
+          <div style={card}>
+            <div className="grid gap-4 sm:grid-cols-[1fr_150px]" style={{ marginBottom: "16px" }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <span style={labelStyle}>Job type</span>
                 <input
                   value={jobType}
                   onChange={(e) => setJobType(e.target.value)}
                   placeholder="Nurse, product manager, teacher…"
-                  className={inputCls}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = "#6366f1")}
+                  onBlur={e  => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="label-mono">Level</span>
+              <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <span style={labelStyle}>Level</span>
                 <select
                   value={experienceLevel}
                   onChange={(e) => setExperienceLevel(e.target.value)}
-                  className={inputCls}
-                  style={{ background: "rgba(5,15,35,0.6)", border: "1px solid rgba(125,211,252,0.15)" }}
+                  style={{ ...inputStyle, appearance: "auto" }}
+                  onFocus={e => (e.target.style.borderColor = "#6366f1")}
+                  onBlur={e  => (e.target.style.borderColor = "#e5e7eb")}
                 >
                   <option value="entry-level">Entry-level</option>
                   <option value="mid-level">Mid-level</option>
@@ -121,52 +158,57 @@ export default function InterviewPage() {
                 </select>
               </label>
             </div>
-            <label className="flex flex-col gap-1.5">
-              <span className="label-mono">Focus areas</span>
+            <label style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "16px" }}>
+              <span style={labelStyle}>Focus areas</span>
               <input
                 value={focusAreas}
                 onChange={(e) => setFocusAreas(e.target.value)}
                 placeholder="behavioral, technical, customer service"
-                className={inputCls}
+                style={inputStyle}
+                onFocus={e => (e.target.style.borderColor = "#6366f1")}
+                onBlur={e  => (e.target.style.borderColor = "#e5e7eb")}
               />
             </label>
             <button
               onClick={generateQuestions}
               disabled={!token || questionLoading || jobType.trim().length < 2}
-              className="py-2.5 rounded-xl btn-accent font-display font-bold text-sm"
+              style={{
+                width: "100%", padding: "11px",
+                background: "#111", color: "#fff",
+                border: "none", borderRadius: "10px",
+                fontSize: "14px", fontWeight: 600, cursor: "pointer",
+                opacity: (!token || questionLoading || jobType.trim().length < 2) ? 0.5 : 1,
+              }}
             >
               {questionLoading ? "Generating…" : "Generate questions"}
             </button>
             {questionError && (
-              <p className="text-xs font-mono rounded-xl px-3 py-2"
-                 style={{ color: "#f87171", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <p style={{ fontSize: "12px", color: "#ef4444", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: "8px", padding: "8px 12px", marginTop: "12px" }}>
                 {questionError}
               </p>
             )}
           </div>
 
           {/* Current question */}
-          <div className="glass rounded-2xl p-5 min-h-[150px]">
-            <p className="label-mono mb-3">Current question</p>
-            <p className="text-lg text-[#e0f2fe] font-display font-bold leading-snug">
+          <div style={card}>
+            <p style={{ ...labelStyle, marginBottom: "12px" }}>Current question</p>
+            <p style={{ fontSize: "18px", fontWeight: 700, color: "#0d0d0d", lineHeight: 1.4, margin: 0 }}>
               {questions[activeQuestion] ?? "Generate a question set to begin."}
             </p>
             {questions.length > 0 && (
-              <div className="flex items-center justify-between gap-3 mt-5">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px" }}>
                 <button
                   onClick={() => setActiveQuestion((c) => Math.max(0, c - 1))}
                   disabled={activeQuestion === 0}
-                  className="text-xs font-mono btn-ghost rounded-lg px-3 py-2 disabled:opacity-30"
+                  style={{ fontSize: "13px", color: "#6b7280", background: "none", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "6px 14px", cursor: "pointer", opacity: activeQuestion === 0 ? 0.3 : 1 }}
                 >
                   Previous
                 </button>
-                <span className="text-xs font-mono" style={{ color: "rgba(125,211,252,0.45)" }}>
-                  {activeQuestion + 1} / {questions.length}
-                </span>
+                <span style={{ fontSize: "13px", color: "#9ca3af" }}>{activeQuestion + 1} / {questions.length}</span>
                 <button
                   onClick={() => setActiveQuestion((c) => Math.min(questions.length - 1, c + 1))}
                   disabled={activeQuestion === questions.length - 1}
-                  className="text-xs font-mono btn-ghost rounded-lg px-3 py-2 disabled:opacity-30"
+                  style={{ fontSize: "13px", color: "#6b7280", background: "none", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "6px 14px", cursor: "pointer", opacity: activeQuestion === questions.length - 1 ? 0.3 : 1 }}
                 >
                   Next
                 </button>
@@ -175,24 +217,24 @@ export default function InterviewPage() {
           </div>
 
           {/* Waveform */}
-          <div className="glass rounded-2xl p-6">
-            <p className="label-mono mb-4">Audio Input</p>
+          <div style={card}>
+            <p style={{ ...labelStyle, marginBottom: "16px" }}>Audio Input</p>
             <Waveform analyserRef={analyserRef} active={recording} />
           </div>
 
           {/* Record controls */}
-          <div className="flex gap-3">
+          <div style={{ display: "flex", gap: "12px" }}>
             {!recording ? (
-              <button onClick={start} className="flex-1 py-3 rounded-xl btn-accent font-display font-bold text-sm">
+              <button
+                onClick={start}
+                style={{ flex: 1, padding: "13px", background: "#111", color: "#fff", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+              >
                 Start recording
               </button>
             ) : (
               <button
                 onClick={stop}
-                className="flex-1 py-3 rounded-xl font-display font-bold text-sm transition-all"
-                style={{ border: "1px solid rgba(248,113,113,0.5)", color: "#f87171" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(248,113,113,0.08)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                style={{ flex: 1, padding: "13px", background: "none", color: "#ef4444", border: "1px solid rgba(239,68,68,0.4)", borderRadius: "10px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
               >
                 Stop recording
               </button>
@@ -200,22 +242,20 @@ export default function InterviewPage() {
           </div>
 
           {error && (
-            <p className="text-xs font-mono rounded-xl px-4 py-3"
-               style={{ color: "#f87171", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <p style={{ fontSize: "13px", color: "#ef4444", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: "10px", padding: "12px 16px" }}>
               {error}
             </p>
           )}
 
           {segments.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="glass rounded-xl p-4">
-                <p className="label-mono">Segments</p>
-                <p className="text-2xl font-display font-bold text-[#e0f2fe] mt-1">{segments.length}</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div style={card}>
+                <p style={labelStyle}>Segments</p>
+                <p style={{ fontSize: "28px", fontWeight: 700, color: "#0d0d0d", margin: "4px 0 0" }}>{segments.length}</p>
               </div>
-              <div className="rounded-xl p-4"
-                   style={{ background: "rgba(125,211,252,0.06)", border: "1px solid rgba(125,211,252,0.2)" }}>
-                <p className="label-mono">Avg Confidence</p>
-                <p className="text-2xl font-display font-bold text-[#7dd3fc] mt-1">
+              <div style={{ ...card, borderColor: "rgba(99,102,241,0.2)" }}>
+                <p style={labelStyle}>Avg Confidence</p>
+                <p style={{ fontSize: "28px", fontWeight: 700, color: "#4f46e5", margin: "4px 0 0" }}>
                   {Math.round(segments.reduce((a, s) => a + s.confidence_score, 0) / segments.length)}%
                 </p>
               </div>
@@ -224,31 +264,30 @@ export default function InterviewPage() {
         </div>
 
         {/* Right column */}
-        <div className="p-8 overflow-y-auto">
-          <p className="label-mono mb-6">Question Set</p>
-          <div className="flex flex-col gap-3 mb-8">
+        <div style={{ padding: "32px", overflowY: "auto" }}>
+          <p style={{ ...labelStyle, marginBottom: "20px" }}>Question Set</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
             {questions.length === 0 ? (
-              <p className="text-sm font-mono" style={{ color: "rgba(125,211,252,0.35)" }}>
-                Questions will appear here after generation.
-              </p>
+              <p style={{ fontSize: "14px", color: "#9ca3af" }}>Questions will appear here after generation.</p>
             ) : questions.map((question, index) => (
               <button
                 key={`${question}-${index}`}
                 onClick={() => setActiveQuestion(index)}
-                className="text-left rounded-xl p-3 transition-all font-mono text-sm"
-                style={
-                  activeQuestion === index
-                    ? { background: "rgba(125,211,252,0.08)", border: "1px solid rgba(125,211,252,0.3)", color: "#d4eeff" }
-                    : { background: "rgba(5,16,30,0.4)", border: "1px solid rgba(125,211,252,0.08)", color: "rgba(125,211,252,0.55)" }
-                }
+                style={{
+                  textAlign: "left", borderRadius: "10px", padding: "12px 14px",
+                  fontSize: "13px", cursor: "pointer",
+                  background: activeQuestion === index ? "rgba(99,102,241,0.06)" : "#fff",
+                  border: activeQuestion === index ? "1.5px solid rgba(99,102,241,0.35)" : "1px solid #e5e7eb",
+                  color: activeQuestion === index ? "#3730a3" : "#4b5563",
+                }}
               >
-                <span className="block label-mono mb-1">Question {index + 1}</span>
-                <span className="leading-relaxed">{question}</span>
+                <span style={{ display: "block", ...labelStyle, marginBottom: "4px" }}>Question {index + 1}</span>
+                <span style={{ lineHeight: 1.5 }}>{question}</span>
               </button>
             ))}
           </div>
 
-          <p className="label-mono mb-6">Real-time Analysis</p>
+          <p style={{ ...labelStyle, marginBottom: "20px" }}>Real-time Analysis</p>
           <FeedbackPanel segments={segments} />
         </div>
       </div>

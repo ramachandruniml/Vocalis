@@ -47,27 +47,27 @@ export default function WaterBackground() {
     window.addEventListener("mousemove", onMove)
     window.addEventListener("mouseleave", onLeave)
 
-    // ── Color gradient: dark navy ──▶ ocean ──▶ baby-blue ──▶ pale sky ──
+    // ── Color gradient: steel blue ──▶ baby blue ──▶ pale sky ──
     const toRGB = (v: number): [number, number, number] => {
       if (v < 0.28) {
         const k = v / 0.28
-        return [2 + k * 4, 6 + k * 16, 18 + k * 44]          // near-black → dark navy
+        return [95 + k * 55, 162 + k * 38, 205 + k * 15]      // steel blue → medium blue
       }
       if (v < 0.52) {
         const k = (v - 0.28) / 0.24
-        return [6 + k * 12, 22 + k * 42, 62 + k * 72]         // dark navy → deep blue
+        return [150 + k * 30, 200 + k * 22, 220 + k * 12]     // medium → baby blue
       }
       if (v < 0.72) {
         const k = (v - 0.52) / 0.20
-        return [18 + k * 38, 64 + k * 80, 134 + k * 72]       // deep blue → ocean blue
+        return [180 + k * 30, 222 + k * 16, 232 + k * 13]     // baby blue → light blue
       }
       if (v < 0.87) {
         const k = (v - 0.72) / 0.15
-        return [56 + k * 68, 144 + k * 68, 206 + k * 36]      // ocean → baby blue
+        return [210 + k * 22, 238 + k * 10, 245 + k * 8]      // light blue → pale sky
       }
       {
         const k = (v - 0.87) / 0.13
-        return [124 + k * 96, 212 + k * 28, 242 + k * 13]     // baby blue → pale sky
+        return [232 + k * 18, 248 + k * 6, 253 + k * 2]       // pale sky → near white
       }
     }
 

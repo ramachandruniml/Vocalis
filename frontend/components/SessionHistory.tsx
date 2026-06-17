@@ -6,32 +6,41 @@ interface Props { sessions: Session[] }
 export default function SessionHistory({ sessions }: Props) {
   if (sessions.length === 0) {
     return (
-      <p className="text-zinc-600 text-sm font-mono text-center py-8">
+      <p style={{ fontSize: "14px", color: "#9ca3af", textAlign: "center", padding: "32px 0", margin: 0 }}>
         No sessions yet. Start your first interview above.
       </p>
     )
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {sessions.map((s) => (
-        <div key={s.id} className="rounded-lg border border-border bg-card p-4 flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="text-xs text-zinc-500 font-mono">
+        <div
+          key={s.id}
+          style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "14px 16px",
+            border: "1px solid #e5e7eb",
+            borderRadius: "10px",
+            background: "#fafafa",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+            <p style={{ fontSize: "12px", color: "#9ca3af", margin: 0 }}>
               {new Date(s.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </p>
-            <p className="text-sm text-zinc-300 font-mono">
-              {s.segmentCount} segments / {s.totalWords} words / {Math.round(s.avgWpm)} WPM
+            <p style={{ fontSize: "13px", color: "#4b5563", margin: 0 }}>
+              {s.segmentCount} segments · {s.totalWords} words · {Math.round(s.avgWpm)} WPM
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-lg font-display font-bold ${
-              s.avgConfidence >= 75 ? "text-accent" :
-              s.avgConfidence >= 50 ? "text-yellow-400" : "text-red-400"
-            }`}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{
+              fontSize: "20px", fontWeight: 700,
+              color: s.avgConfidence >= 75 ? "#4f46e5" : s.avgConfidence >= 50 ? "#d97706" : "#ef4444",
+            }}>
               {Math.round(s.avgConfidence)}%
             </span>
-            <span className="text-xs text-zinc-600 font-mono">conf.</span>
+            <span style={{ fontSize: "12px", color: "#9ca3af" }}>conf.</span>
           </div>
         </div>
       ))}

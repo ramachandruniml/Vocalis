@@ -13,12 +13,12 @@ const config: Config = {
         mono: ["var(--font-dm-mono)", "monospace"],
       },
       colors: {
-        accent: "#7dd3fc",        // sky-300 — baby blue
-        "accent-dim": "#38bdf8",  // sky-400
-        "accent-bright": "#e0f2fe",
-        panel: "#07182e",
-        card: "#0a2040",
-        border: "#1a4a7a",
+        accent: "#2563eb",        // blue-600 — deep blue for light bg
+        "accent-dim": "#1d4ed8",  // blue-700
+        "accent-bright": "#0d2b4a",
+        panel: "rgba(255,255,255,0.50)",
+        card: "rgba(255,255,255,0.45)",
+        border: "rgba(14,80,160,0.18)",
       },
       animation: {
         "pulse-slow": "pulse 2s cubic-bezier(0.4,0,0.6,1) infinite",

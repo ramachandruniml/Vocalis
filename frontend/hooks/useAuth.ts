@@ -10,6 +10,19 @@ import {
   type User,
 } from "@/lib/firebase"
 
+function friendlyError(e: any): string {
+  const code: string = e?.code ?? ""
+  if (code === "auth/email-already-in-use")  return "An account with this email already exists."
+  if (code === "auth/wrong-password")         return "Incorrect password. Please try again."
+  if (code === "auth/user-not-found")         return "No account found with this email."
+  if (code === "auth/invalid-credential")     return "Incorrect email or password."
+  if (code === "auth/invalid-email")          return "Please enter a valid email address."
+  if (code === "auth/weak-password")          return "Password must be at least 6 characters."
+  if (code === "auth/too-many-requests")      return "Too many attempts. Please try again later."
+  if (code === "auth/network-request-failed") return "Network error. Check your connection."
+  return "Something went wrong. Please try again."
+}
+
 export function useAuth() {
   const [user, setUser]   = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -33,7 +46,7 @@ export function useAuth() {
   const withError = async (fn: () => Promise<any>) => {
     setError(null)
     try { await fn() }
-    catch (e: any) { setError(e.message) }
+    catch (e: any) { setError(friendlyError(e)) }
   }
 
   return {

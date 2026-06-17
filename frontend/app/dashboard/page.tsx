@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
 import { getSessions } from "@/lib/api"
 import SessionHistory from "@/components/SessionHistory"
-import WaterBackground from "@/components/WaterBackground"
 import type { Session } from "@/types"
 
 export default function Dashboard() {
@@ -28,74 +27,94 @@ export default function Dashboard() {
   }, [token])
 
   if (loading) return (
-    <div className="min-h-screen bg-[#05101e] flex items-center justify-center">
-      <span
-        className="w-6 h-6 border-2 rounded-full animate-spin"
-        style={{ borderColor: "rgba(125,211,252,0.2)", borderTopColor: "#7dd3fc" }}
-      />
+    <div style={{ minHeight: "100vh", background: "#f5f5f7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span className="w-6 h-6 border-2 rounded-full animate-spin"
+            style={{ borderColor: "rgba(0,0,0,0.08)", borderTopColor: "#111" }} />
     </div>
   )
 
   return (
-    <div className="relative min-h-screen bg-[#05101e] overflow-hidden">
-      <WaterBackground />
+    <div style={{ minHeight: "100vh", background: "#f5f5f7" }}>
 
       {/* Header */}
-      <header
-        className="relative border-b px-6 py-4 flex items-center justify-between"
-        style={{
-          zIndex: 10,
-          background: "rgba(5, 16, 30, 0.7)",
-          backdropFilter: "blur(12px)",
-          borderColor: "rgba(125,211,252,0.1)",
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg btn-accent font-display font-black text-xs">VC</span>
-          <span className="font-display font-bold text-[#e0f2fe]">Vocalis</span>
+      <header style={{
+        background: "#fff",
+        borderBottom: "1px solid #e5e7eb",
+        padding: "0 24px",
+        height: "60px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <svg width="28" height="20" viewBox="0 0 32 22" aria-hidden>
+            <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#4f46e5"/>
+          </svg>
+          <span style={{ fontWeight: 600, fontSize: "16px", color: "#111" }}>Vocalis</span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-xs font-mono" style={{ color: "rgba(125,211,252,0.45)" }}>{user?.email}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span style={{ fontSize: "13px", color: "#9ca3af" }}>{user?.email}</span>
           <button
             onClick={logout}
-            className="text-xs font-mono btn-ghost rounded-lg px-3 py-1.5"
+            style={{
+              fontSize: "13px", fontWeight: 500, color: "#6b7280",
+              background: "none", border: "1px solid #e5e7eb",
+              borderRadius: "8px", padding: "6px 14px", cursor: "pointer",
+            }}
           >
-            Logout
+            Log out
           </button>
         </div>
       </header>
 
-      <main className="relative max-w-3xl mx-auto px-6 py-12" style={{ zIndex: 10 }}>
-        <div className="flex items-center justify-between mb-10">
+      <main style={{ maxWidth: "720px", margin: "0 auto", padding: "48px 24px" }}>
+
+        {/* Title row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
           <div>
-            <h1 className="font-display font-bold text-2xl text-[#e0f2fe]">Dashboard</h1>
-            <p className="text-sm font-mono mt-1" style={{ color: "rgba(125,211,252,0.5)" }}>
-              Track your interview performance over time.
-            </p>
+            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#0d0d0d", margin: "0 0 4px" }}>Dashboard</h1>
+            <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>Track your interview performance over time.</p>
           </div>
           <Link
             href="/dashboard/interview"
-            className="px-5 py-2.5 rounded-xl btn-accent font-display font-bold text-sm"
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "#111",
+              color: "#fff",
+              borderRadius: "10px",
+              fontSize: "14px",
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
           >
             New Interview
           </Link>
         </div>
 
+        {/* Sessions card */}
         <section>
-          <p className="label-mono mb-4">Recent Sessions</p>
-          <div className="glass rounded-2xl p-6">
+          <p style={{ fontSize: "11px", fontWeight: 600, color: "#9ca3af", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "16px" }}>
+            Recent Sessions
+          </p>
+          <div style={{
+            background: "#fff",
+            borderRadius: "16px",
+            padding: "24px",
+            border: "1px solid #f0f0f0",
+            boxShadow: "0 1px 8px rgba(0,0,0,0.05)",
+          }}>
             {fetching ? (
-              <div className="flex justify-center py-8">
-                <span
-                  className="w-5 h-5 border-2 rounded-full animate-spin"
-                  style={{ borderColor: "rgba(125,211,252,0.2)", borderTopColor: "#7dd3fc" }}
-                />
+              <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
+                <span className="w-5 h-5 border-2 rounded-full animate-spin"
+                      style={{ borderColor: "rgba(0,0,0,0.08)", borderTopColor: "#111" }} />
               </div>
             ) : (
               <SessionHistory sessions={sessions} />
             )}
           </div>
         </section>
+
       </main>
     </div>
   )
