@@ -1,5 +1,5 @@
 "use client"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { useAudioCapture } from "@/hooks/useAudioCapture"
@@ -39,7 +39,9 @@ export default function InterviewPage() {
   const [segments, setSegments] = useState<InterviewSegment[]>([])
   const [jobType, setJobType] = useState("Software engineer")
   const [experienceLevel, setExperienceLevel] = useState("mid-level")
-  const [focusAreas, setFocusAreas] = useState("behavioral, technical, problem solving")
+  const [selectedAreas, setSelectedAreas] = useState<string[]>(["behavioral", "technical", "situational"])
+  const [areaMenuOpen, setAreaMenuOpen] = useState(false)
+  const areaRef = useRef<HTMLDivElement>(null)
   const [questions, setQuestions] = useState<string[]>([])
   const [activeQuestion, setActiveQuestion] = useState(0)
   const [questionLoading, setQuestionLoading] = useState(false)
@@ -48,6 +50,18 @@ export default function InterviewPage() {
   useEffect(() => {
     if (!loading && !user) router.push("/")
   }, [user, loading, router])
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (areaRef.current && !areaRef.current.contains(e.target as Node))
+        setAreaMenuOpen(false)
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [])
+
+  const toggleArea = (val: string) =>
+    setSelectedAreas(prev => prev.includes(val) ? prev.filter(a => a !== val) : [...prev, val])
 
   const handleSegment = useCallback((seg: InterviewSegment) => {
     setSegments((prev) => [...prev, seg])
@@ -63,7 +77,7 @@ export default function InterviewPage() {
       const data = await getInterviewQuestions(token, {
         jobType,
         experienceLevel,
-        focusAreas: focusAreas.split(",").map((a) => a.trim()).filter(Boolean),
+        focusAreas: selectedAreas,
         count: 8,
       }) as InterviewQuestionsResponse
       setQuestions(data.questions)
@@ -73,11 +87,7 @@ export default function InterviewPage() {
     } finally {
       setQuestionLoading(false)
     }
-  }, [experienceLevel, focusAreas, jobType, token])
-
-  useEffect(() => {
-    if (token && questions.length === 0 && !questionLoading) void generateQuestions()
-  }, [generateQuestions, questionLoading, questions.length, token])
+  }, [experienceLevel, selectedAreas, jobType, token])
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f5f7", display: "flex", flexDirection: "column" }}>
@@ -158,17 +168,63 @@ export default function InterviewPage() {
                 </select>
               </label>
             </div>
-            <label style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "16px" }}>
               <span style={labelStyle}>Focus areas</span>
-              <input
-                value={focusAreas}
-                onChange={(e) => setFocusAreas(e.target.value)}
-                placeholder="behavioral, technical, customer service"
-                style={inputStyle}
-                onFocus={e => (e.target.style.borderColor = "#6366f1")}
-                onBlur={e  => (e.target.style.borderColor = "#e5e7eb")}
-              />
-            </label>
+              <div ref={areaRef} style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={() => setAreaMenuOpen(o => !o)}
+                  style={{
+                    ...inputStyle,
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    cursor: "pointer", textAlign: "left",
+                    borderColor: areaMenuOpen ? "#6366f1" : "#e5e7eb",
+                  }}
+                >
+                  <span style={{ color: selectedAreas.length ? "#0d0d0d" : "#9ca3af", fontSize: "14px" }}>
+                    {selectedAreas.length
+                      ? selectedAreas.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(", ")
+                      : "Select focus areas…"}
+                  </span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: areaMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                {areaMenuOpen && (
+                  <div style={{
+                    position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 50,
+                    background: "#fff", border: "1.5px solid #6366f1", borderRadius: "10px",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.08)", overflow: "hidden",
+                  }}>
+                    {[
+                      { label: "Behavioral",    value: "behavioral" },
+                      { label: "Situational",   value: "situational" },
+                      { label: "Technical",     value: "technical" },
+                      { label: "Problem Solving", value: "problem solving" },
+                      { label: "Leadership",    value: "leadership" },
+                      { label: "Communication", value: "communication" },
+                    ].map(opt => (
+                      <label
+                        key={opt.value}
+                        style={{
+                          display: "flex", alignItems: "center", gap: "10px",
+                          padding: "10px 14px", cursor: "pointer", fontSize: "14px", color: "#0d0d0d",
+                          background: selectedAreas.includes(opt.value) ? "rgba(99,102,241,0.06)" : "transparent",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedAreas.includes(opt.value)}
+                          onChange={() => toggleArea(opt.value)}
+                          style={{ accentColor: "#6366f1", width: "15px", height: "15px", flexShrink: 0 }}
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
             <button
               onClick={generateQuestions}
               disabled={!token || questionLoading || jobType.trim().length < 2}
@@ -176,11 +232,16 @@ export default function InterviewPage() {
                 width: "100%", padding: "11px",
                 background: "#111", color: "#fff",
                 border: "none", borderRadius: "10px",
-                fontSize: "14px", fontWeight: 600, cursor: "pointer",
+                fontSize: "14px", fontWeight: 600,
+                cursor: (!token || questionLoading || jobType.trim().length < 2) ? "not-allowed" : "pointer",
                 opacity: (!token || questionLoading || jobType.trim().length < 2) ? 0.5 : 1,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
               }}
             >
-              {questionLoading ? "Generating…" : "Generate questions"}
+              {questionLoading && (
+                <span style={{ width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
+              )}
+              {questionLoading ? "Generating…" : questions.length > 0 ? "Regenerate questions" : "Generate questions"}
             </button>
             {questionError && (
               <p style={{ fontSize: "12px", color: "#ef4444", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: "8px", padding: "8px 12px", marginTop: "12px" }}>
@@ -192,9 +253,17 @@ export default function InterviewPage() {
           {/* Current question */}
           <div style={card}>
             <p style={{ ...labelStyle, marginBottom: "12px" }}>Current question</p>
-            <p style={{ fontSize: "18px", fontWeight: 700, color: "#0d0d0d", lineHeight: 1.4, margin: 0 }}>
-              {questions[activeQuestion] ?? "Generate a question set to begin."}
-            </p>
+            {questions.length === 0 ? (
+              <p style={{ fontSize: "15px", color: "#9ca3af", lineHeight: 1.6, margin: 0 }}>
+                {questionLoading
+                  ? "Generating questions tailored to your role…"
+                  : "Configure your role above and click Generate questions to begin."}
+              </p>
+            ) : (
+              <p style={{ fontSize: "18px", fontWeight: 700, color: "#0d0d0d", lineHeight: 1.4, margin: 0 }}>
+                {questions[activeQuestion]}
+              </p>
+            )}
             {questions.length > 0 && (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "20px" }}>
                 <button
@@ -268,7 +337,9 @@ export default function InterviewPage() {
           <p style={{ ...labelStyle, marginBottom: "20px" }}>Question Set</p>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
             {questions.length === 0 ? (
-              <p style={{ fontSize: "14px", color: "#9ca3af" }}>Questions will appear here after generation.</p>
+              <p style={{ fontSize: "14px", color: "#9ca3af", lineHeight: 1.6 }}>
+                {questionLoading ? "Generating…" : "Click \"Generate questions\" to create a personalized set for your role and level."}
+              </p>
             ) : questions.map((question, index) => (
               <button
                 key={`${question}-${index}`}
