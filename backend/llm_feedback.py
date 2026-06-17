@@ -3,10 +3,8 @@ import json
 import re
 import random
 from openai import AsyncOpenAI
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
 
-# ── Groq client (free AI — question generation) ───────────────────────────────
+# ── Groq client (free AI) ─────────────────────────────────────────────────────
 
 def get_groq_client() -> AsyncOpenAI | None:
     api_key = os.environ.get("GROQ_API_KEY")
@@ -17,48 +15,109 @@ def get_groq_client() -> AsyncOpenAI | None:
         base_url="https://api.groq.com/openai/v1",
     )
 
-# ── OpenAI client (optional — real-time feedback) ────────────────────────────
+# ── Real-time feedback (Groq, FAANG-calibrated) ───────────────────────────────
 
-_openai_llm = None
+def _basic_feedback(transcript: str, features: dict) -> str:
+    wpm = features.get("wpm", 0)
+    filler_rate = features.get("filler_rate", 0)
+    structure = "Use the STAR method: open with the Situation, define your Task, detail your Actions specifically, then quantify the Result."
 
-def get_llm():
-    global _openai_llm
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        return None
-    if _openai_llm is None:
-        _openai_llm = ChatOpenAI(
-            model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-            temperature=0.7,
-            api_key=api_key,
+    if not transcript.strip():
+        return json.dumps({
+            "expand": "No transcript was captured — ensure your microphone is working and speak clearly.",
+            "cut": "N/A",
+            "must_mention": "Quantified results — top candidates always include metrics (%, $, time saved).",
+            "structure": structure,
+            "overall": "Check your microphone setup and try again.",
+        })
+
+    pace = ""
+    if wpm < 100:
+        pace = "Speak slightly faster — your pace is below the natural interview rhythm of 130–150 WPM."
+    elif wpm > 180:
+        pace = "Slow down — at your pace interviewers struggle to absorb the key points."
+    else:
+        pace = "Your speaking pace is good. Focus on depth and clarity of content."
+
+    cut = "Avoid lengthy background context before getting to the action — interviewers want to hear what YOU did."
+    if filler_rate > 0.08:
+        cut = f"Reduce filler words (used {filler_rate*100:.0f}% of the time) — use a deliberate pause instead."
+
+    return json.dumps({
+        "expand": "Add specific metrics and outcomes — numbers make your answer memorable and credible.",
+        "cut": cut,
+        "must_mention": "Quantified results and the direct business or team impact of your actions.",
+        "structure": structure,
+        "overall": pace,
+    })
+
+
+async def transcribe_with_groq(audio_bytes: bytes, filename: str = "recording.webm") -> str:
+    """Send audio to Groq Whisper — no local installation needed."""
+    client = get_groq_client()
+    if not client:
+        return ""
+    try:
+        response = await client.audio.transcriptions.create(
+            model="whisper-large-v3-turbo",
+            file=(filename, audio_bytes, "audio/webm"),
         )
-    return _openai_llm
+        return response.text.strip()
+    except Exception as e:
+        print(f"Groq transcription error: {e}")
+        return ""
 
-# ── Real-time feedback ────────────────────────────────────────────────────────
 
-PROMPT = ChatPromptTemplate.from_template("""
-You are a rigorous technical interviewer at a top-tier tech company.
+async def get_llm_feedback(transcript: str, features: dict, question: str = "") -> str:
+    client = get_groq_client()
+    if not client or not transcript.strip():
+        return _basic_feedback(transcript, features)
 
-Candidate response: {transcript}
-Words per minute: {wpm}
-Filler word rate: {filler_rate}
-Vocabulary richness: {unique_word_ratio}
-Filler words used: {filler_words}
+    wpm = features.get("wpm", 0)
+    filler_rate = features.get("filler_rate", 0)
+    word_count = features.get("word_count", 0)
+    filler_words = features.get("filler_words", [])
+    filler_list = ", ".join(set(filler_words)) if filler_words else "none"
+    question_ctx = f'Interview question: "{question}"\n\n' if question else ""
 
-Respond with:
-1. One sharp behavioral follow-up question
-2. One sentence of direct coaching on their delivery
+    prompt = f"""You are a senior interviewer at a top-tier tech company (Google, Meta, Amazon, Apple, Microsoft).
+Analyze this interview answer using the same criteria that separates offers from rejections at FAANG companies.
 
-Be concise (under 80 words). Be direct, not encouraging.
-""")
+{question_ctx}Candidate's answer:
+"{transcript}"
 
-async def get_llm_feedback(transcript: str, features: dict) -> str:
-    model = get_llm()
-    if model is None:
-        return "Add more specific examples, keep your answer structured, and reduce filler words in the next response."
-    chain = PROMPT | model
-    response = await chain.ainvoke({"transcript": transcript, **features})
-    return response.content
+Speech metrics: {wpm:.0f} WPM | {filler_rate*100:.1f}% filler words ({filler_list}) | {word_count} words total
+
+Give SPECIFIC, ACTIONABLE feedback grounded in what the best candidates actually do. Be direct and honest.
+
+Return ONLY this JSON object (no markdown, no explanation):
+{{
+  "expand": "What specific detail, metric, or aspect did they gloss over that top candidates always go deep on? Name it precisely.",
+  "cut": "What specific part was too vague, too long, or added no value? Be exact.",
+  "must_mention": "What concept, framework, quantified result, or evidence do the strongest candidates always include that this answer missed?",
+  "structure": "Did they use STAR (Situation/Task/Action/Result) effectively? What one structural change would make the biggest impact?",
+  "overall": "The single most important thing to change before their real interview. One direct, specific sentence."
+}}"""
+
+    try:
+        response = await client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=600,
+        )
+        raw = (response.choices[0].message.content or "").strip()
+        raw = re.sub(r"^```[a-z]*\n?", "", raw)
+        raw = re.sub(r"\n?```$", "", raw)
+        raw = raw.strip()
+        # Validate it's parseable JSON with our expected keys
+        parsed = json.loads(raw)
+        if all(k in parsed for k in ("expand", "cut", "must_mention", "structure", "overall")):
+            return raw
+    except Exception as e:
+        print(f"Groq feedback error: {e}")
+
+    return _basic_feedback(transcript, features)
 
 # ── Question bank ─────────────────────────────────────────────────────────────
 

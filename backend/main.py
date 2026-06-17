@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from database import connect_db, disconnect_db
 from firebase_admin_setup import init_firebase
 from routes.sessions import router as sessions_router
+from routes.analyze import router as analyze_router
 from websocket_handler import interview_socket
 
 limiter = Limiter(key_func=get_remote_address)
@@ -36,6 +37,7 @@ app.add_middleware(
 )
 
 app.include_router(sessions_router, prefix="/api", tags=["sessions"])
+app.include_router(analyze_router, prefix="/api", tags=["analyze"])
 app.add_api_websocket_route("/ws/interview", interview_socket)
 
 @app.get("/health")
