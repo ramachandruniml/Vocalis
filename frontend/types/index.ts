@@ -7,12 +7,22 @@ export interface SpeechFeatures {
   word_count: number
 }
 
+export interface FeedbackAnalysis {
+  expand: string
+  cut: string
+  must_mention: string
+  structure: string
+  overall: string
+}
+
 export interface InterviewSegment {
   transcript: string
   features: SpeechFeatures
   confidence_score: number
   feedback: string
+  analysis?: FeedbackAnalysis
   timestamp?: number
+  questionIndex?: number
 }
 
 export interface Session {

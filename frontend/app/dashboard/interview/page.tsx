@@ -36,10 +36,15 @@ const card: React.CSSProperties = {
 export default function InterviewPage() {
   const { user, token, loading } = useAuth()
   const router = useRouter()
-  const [segments, setSegments] = useState<InterviewSegment[]>([])
-  const [jobType, setJobType] = useState("Software engineer")
-  const [experienceLevel, setExperienceLevel] = useState("mid-level")
-  const [selectedAreas, setSelectedAreas] = useState<string[]>(["behavioral", "technical", "situational"])
+
+  // Per-question answer tracking: question index → latest segment
+  const [questionAnswers, setQuestionAnswers] = useState<Record<number, InterviewSegment>>({})
+  // Which question's analysis is shown in right panel
+  const [viewingAnalysisFor, setViewingAnalysisFor] = useState<number | null>(null)
+
+  const [jobType, setJobType] = useState("")
+  const [experienceLevel, setExperienceLevel] = useState("")
+  const [selectedAreas, setSelectedAreas] = useState<string[]>([])
   const [areaMenuOpen, setAreaMenuOpen] = useState(false)
   const areaRef = useRef<HTMLDivElement>(null)
   const [questions, setQuestions] = useState<string[]>([])
@@ -64,10 +69,12 @@ export default function InterviewPage() {
     setSelectedAreas(prev => prev.includes(val) ? prev.filter(a => a !== val) : [...prev, val])
 
   const handleSegment = useCallback((seg: InterviewSegment) => {
-    setSegments((prev) => [...prev, seg])
-  }, [])
+    const qIdx = seg.questionIndex ?? activeQuestion
+    setQuestionAnswers(prev => ({ ...prev, [qIdx]: seg }))
+    setViewingAnalysisFor(qIdx)
+  }, [activeQuestion])
 
-  const { start, stop, recording, analyserRef, error } = useAudioCapture(token, handleSegment)
+  const { start, stop, recording, analyzing, analyserRef, error } = useAudioCapture(token, handleSegment)
 
   const generateQuestions = useCallback(async () => {
     if (!token) return
@@ -82,12 +89,16 @@ export default function InterviewPage() {
       }) as InterviewQuestionsResponse
       setQuestions(data.questions)
       setActiveQuestion(0)
+      setQuestionAnswers({})
+      setViewingAnalysisFor(null)
     } catch (err) {
       setQuestionError(err instanceof Error ? err.message : "Could not generate questions")
     } finally {
       setQuestionLoading(false)
     }
   }, [experienceLevel, selectedAreas, jobType, token])
+
+  const answeredCount = Object.keys(questionAnswers).length
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f5f7", display: "flex", flexDirection: "column" }}>
@@ -109,26 +120,33 @@ export default function InterviewPage() {
           </svg>
           <span style={{ fontWeight: 600, fontSize: "16px", color: "#111" }}>Vocalis</span>
           {recording && (
-            <span className="flex items-center gap-1.5 animate-pulse" style={{ fontSize: "12px", color: "#ef4444", display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
+            <span style={{ fontSize: "12px", color: "#ef4444", display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block", animation: "blink 1s ease-in-out infinite" }} />
               LIVE
             </span>
           )}
         </div>
-        <button
-          onClick={() => router.push("/dashboard")}
-          style={{
-            fontSize: "13px", fontWeight: 500, color: "#6b7280",
-            background: "none", border: "1px solid #e5e7eb",
-            borderRadius: "8px", padding: "6px 14px", cursor: "pointer",
-          }}
-        >
-          Back to dashboard
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {questions.length > 0 && (
+            <span style={{ fontSize: "13px", color: "#6b7280" }}>
+              {answeredCount} / {questions.length} answered
+            </span>
+          )}
+          <button
+            onClick={() => router.push("/dashboard")}
+            style={{
+              fontSize: "13px", fontWeight: 500, color: "#6b7280",
+              background: "none", border: "1px solid #e5e7eb",
+              borderRadius: "8px", padding: "6px 14px", cursor: "pointer",
+            }}
+          >
+            Back to dashboard
+          </button>
+        </div>
       </header>
 
       {/* Two-column body */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px]" style={{ flex: 1 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px]" style={{ flex: 1 }}>
 
         {/* Left column */}
         <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px", borderRight: "1px solid #e5e7eb" }}>
@@ -146,7 +164,7 @@ export default function InterviewPage() {
                 <input
                   value={jobType}
                   onChange={(e) => setJobType(e.target.value)}
-                  placeholder="Nurse, product manager, teacher…"
+                  placeholder="e.g. Nurse, product manager, teacher…"
                   style={inputStyle}
                   onFocus={e => (e.target.style.borderColor = "#6366f1")}
                   onBlur={e  => (e.target.style.borderColor = "#e5e7eb")}
@@ -157,10 +175,11 @@ export default function InterviewPage() {
                 <select
                   value={experienceLevel}
                   onChange={(e) => setExperienceLevel(e.target.value)}
-                  style={{ ...inputStyle, appearance: "auto" }}
+                  style={{ ...inputStyle, appearance: "auto", color: experienceLevel ? "#0d0d0d" : "#9ca3af" }}
                   onFocus={e => (e.target.style.borderColor = "#6366f1")}
                   onBlur={e  => (e.target.style.borderColor = "#e5e7eb")}
                 >
+                  <option value="" disabled>Pick level…</option>
                   <option value="entry-level">Entry-level</option>
                   <option value="mid-level">Mid-level</option>
                   <option value="senior">Senior</option>
@@ -184,7 +203,7 @@ export default function InterviewPage() {
                   <span style={{ color: selectedAreas.length ? "#0d0d0d" : "#9ca3af", fontSize: "14px" }}>
                     {selectedAreas.length
                       ? selectedAreas.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(", ")
-                      : "Select focus areas…"}
+                      : "Choose style…"}
                   </span>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: areaMenuOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
                     <polyline points="6 9 12 15 18 9"/>
@@ -197,12 +216,12 @@ export default function InterviewPage() {
                     boxShadow: "0 4px 16px rgba(0,0,0,0.08)", overflow: "hidden",
                   }}>
                     {[
-                      { label: "Behavioral",    value: "behavioral" },
-                      { label: "Situational",   value: "situational" },
-                      { label: "Technical",     value: "technical" },
+                      { label: "Behavioral",      value: "behavioral" },
+                      { label: "Situational",     value: "situational" },
+                      { label: "Technical",       value: "technical" },
                       { label: "Problem Solving", value: "problem solving" },
-                      { label: "Leadership",    value: "leadership" },
-                      { label: "Communication", value: "communication" },
+                      { label: "Leadership",      value: "leadership" },
+                      { label: "Communication",   value: "communication" },
                     ].map(opt => (
                       <label
                         key={opt.value}
@@ -227,14 +246,14 @@ export default function InterviewPage() {
             </div>
             <button
               onClick={generateQuestions}
-              disabled={!token || questionLoading || jobType.trim().length < 2}
+              disabled={!token || questionLoading || jobType.trim().length < 2 || !experienceLevel}
               style={{
                 width: "100%", padding: "11px",
                 background: "#111", color: "#fff",
                 border: "none", borderRadius: "10px",
                 fontSize: "14px", fontWeight: 600,
-                cursor: (!token || questionLoading || jobType.trim().length < 2) ? "not-allowed" : "pointer",
-                opacity: (!token || questionLoading || jobType.trim().length < 2) ? 0.5 : 1,
+                cursor: (!token || questionLoading || jobType.trim().length < 2 || !experienceLevel) ? "not-allowed" : "pointer",
+                opacity: (!token || questionLoading || jobType.trim().length < 2 || !experienceLevel) ? 0.5 : 1,
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
               }}
             >
@@ -292,76 +311,113 @@ export default function InterviewPage() {
           </div>
 
           {/* Record controls */}
-          <div style={{ display: "flex", gap: "12px" }}>
-            {!recording ? (
-              <button
-                onClick={start}
-                style={{ flex: 1, padding: "13px", background: "#111", color: "#fff", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
-              >
-                Start recording
-              </button>
-            ) : (
-              <button
-                onClick={stop}
-                style={{ flex: 1, padding: "13px", background: "none", color: "#ef4444", border: "1px solid rgba(239,68,68,0.4)", borderRadius: "10px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
-              >
-                Stop recording
-              </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "12px" }}>
+              {!recording ? (
+                <button
+                  onClick={() => start(questions[activeQuestion] || "", activeQuestion)}
+                  disabled={questions.length === 0}
+                  style={{
+                    flex: 1, padding: "13px",
+                    background: questions.length === 0 ? "#d1d5db" : "#111",
+                    color: "#fff", border: "none", borderRadius: "10px",
+                    fontSize: "14px", fontWeight: 600,
+                    cursor: questions.length === 0 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {questionAnswers[activeQuestion] ? "Re-record answer" : "Start recording"}
+                </button>
+              ) : (
+                <button
+                  onClick={stop}
+                  style={{ flex: 1, padding: "13px", background: "none", color: "#ef4444", border: "1px solid rgba(239,68,68,0.4)", borderRadius: "10px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+                >
+                  Stop recording
+                </button>
+              )}
+            </div>
+            {recording && (
+              <p style={{ fontSize: "12px", color: "#6b7280", textAlign: "center", margin: 0 }}>
+                Answering question {activeQuestion + 1}… Click Stop when done — analysis appears on the right.
+              </p>
+            )}
+            {error && (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "10px", padding: "12px 14px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: "1px" }}>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p style={{ fontSize: "13px", color: "#dc2626", margin: 0, lineHeight: 1.5 }}>{error}</p>
+              </div>
             )}
           </div>
-
-          {error && (
-            <p style={{ fontSize: "13px", color: "#ef4444", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: "10px", padding: "12px 16px" }}>
-              {error}
-            </p>
-          )}
-
-          {segments.length > 0 && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <div style={card}>
-                <p style={labelStyle}>Segments</p>
-                <p style={{ fontSize: "28px", fontWeight: 700, color: "#0d0d0d", margin: "4px 0 0" }}>{segments.length}</p>
-              </div>
-              <div style={{ ...card, borderColor: "rgba(99,102,241,0.2)" }}>
-                <p style={labelStyle}>Avg Confidence</p>
-                <p style={{ fontSize: "28px", fontWeight: 700, color: "#4f46e5", margin: "4px 0 0" }}>
-                  {Math.round(segments.reduce((a, s) => a + s.confidence_score, 0) / segments.length)}%
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Right column */}
-        <div style={{ padding: "32px", overflowY: "auto" }}>
-          <p style={{ ...labelStyle, marginBottom: "20px" }}>Question Set</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "32px" }}>
-            {questions.length === 0 ? (
-              <p style={{ fontSize: "14px", color: "#9ca3af", lineHeight: 1.6 }}>
-                {questionLoading ? "Generating…" : "Click \"Generate questions\" to create a personalized set for your role and level."}
-              </p>
-            ) : questions.map((question, index) => (
-              <button
-                key={`${question}-${index}`}
-                onClick={() => setActiveQuestion(index)}
-                style={{
-                  textAlign: "left", borderRadius: "10px", padding: "12px 14px",
-                  fontSize: "13px", cursor: "pointer",
-                  background: activeQuestion === index ? "rgba(99,102,241,0.06)" : "#fff",
-                  border: activeQuestion === index ? "1.5px solid rgba(99,102,241,0.35)" : "1px solid #e5e7eb",
-                  color: activeQuestion === index ? "#3730a3" : "#4b5563",
-                }}
-              >
-                <span style={{ display: "block", ...labelStyle, marginBottom: "4px" }}>Question {index + 1}</span>
-                <span style={{ lineHeight: 1.5 }}>{question}</span>
-              </button>
-            ))}
+        <div style={{ padding: "32px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "28px" }}>
+
+          {/* Question list */}
+          <div>
+            <p style={{ ...labelStyle, marginBottom: "12px" }}>Question Set</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {questions.length === 0 ? (
+                <p style={{ fontSize: "14px", color: "#9ca3af", lineHeight: 1.6 }}>
+                  {questionLoading ? "Generating…" : "Click \"Generate questions\" to create a personalized set for your role and level."}
+                </p>
+              ) : questions.map((question, index) => {
+                const isAnswered = !!questionAnswers[index]
+                const isActive = activeQuestion === index
+                return (
+                  <button
+                    key={`${question}-${index}`}
+                    onClick={() => {
+                      setActiveQuestion(index)
+                      setViewingAnalysisFor(isAnswered ? index : viewingAnalysisFor)
+                    }}
+                    style={{
+                      textAlign: "left", borderRadius: "10px", padding: "12px 14px",
+                      fontSize: "13px", cursor: "pointer",
+                      background: isActive ? "rgba(99,102,241,0.06)" : "#fff",
+                      border: isActive ? "1.5px solid rgba(99,102,241,0.35)" : "1px solid #e5e7eb",
+                      color: isActive ? "#3730a3" : "#4b5563",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
+                      <span style={{ ...labelStyle, color: isActive ? "#6366f1" : "#9ca3af" }}>Question {index + 1}</span>
+                      {isAnswered && (
+                        <span style={{
+                          fontSize: "10px", fontWeight: 700, letterSpacing: "0.04em",
+                          color: "#10b981", background: "rgba(16,185,129,0.1)",
+                          border: "1px solid rgba(16,185,129,0.25)",
+                          borderRadius: "100px", padding: "2px 8px",
+                        }}>
+                          Answered
+                        </span>
+                      )}
+                    </div>
+                    <span style={{ lineHeight: 1.5 }}>{question}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
-          <p style={{ ...labelStyle, marginBottom: "20px" }}>Real-time Analysis</p>
-          <FeedbackPanel segments={segments} />
+          {/* Analysis panel */}
+          <div>
+            <p style={{ ...labelStyle, marginBottom: "12px" }}>Analysis</p>
+            <FeedbackPanel
+              segment={viewingAnalysisFor !== null ? (questionAnswers[viewingAnalysisFor] ?? null) : null}
+              questionIndex={viewingAnalysisFor}
+              questionText={viewingAnalysisFor !== null ? (questions[viewingAnalysisFor] ?? "") : ""}
+              analyzing={analyzing}
+            />
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+        @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+      `}</style>
     </div>
   )
 }
