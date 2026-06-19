@@ -12,6 +12,8 @@ export interface FeedbackAnalysis {
   cut: string
   must_mention: string
   structure: string
+  pace?: string
+  framing?: string
   overall: string
 }
 

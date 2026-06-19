@@ -16,15 +16,18 @@ export function useAudioCapture(
   const qIndexRef   = useRef<number>(0)
   const questionRef = useRef<string>("")
   const mimeRef     = useRef<string>("audio/webm")
+  const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const [recording, setRecording] = useState(false)
-  const [analyzing, setAnalyzing] = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+  const [recording,       setRecording]       = useState(false)
+  const [analyzing,       setAnalyzing]       = useState(false)
+  const [error,           setError]           = useState<string | null>(null)
+  const [elapsedSeconds,  setElapsedSeconds]  = useState(0)
 
   const start = useCallback(async (questionText: string = "", questionIndex: number = 0) => {
     if (!token) return
     setError(null)
     setAnalyzing(false)
+    setElapsedSeconds(0)
     chunksRef.current   = []
     durationRef.current = 0
     qIndexRef.current   = questionIndex
@@ -124,6 +127,7 @@ export function useAudioCapture(
 
       recorder.start(1000)
       recorderRef.current = recorder
+      timerRef.current = setInterval(() => setElapsedSeconds(s => s + 1), 1000)
       setRecording(true)
     } catch (e: any) {
       setError(e?.message || "Something went wrong starting the recording.")
@@ -132,6 +136,10 @@ export function useAudioCapture(
   }, [token, onSegment])
 
   const stop = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
     if (recorderRef.current && recorderRef.current.state !== "inactive") {
       recorderRef.current.stop()  // triggers ondataavailable → "stop" event → POST to backend
     }
@@ -141,5 +149,5 @@ export function useAudioCapture(
     // analyzing flips to true inside the "stop" handler once the POST is in-flight
   }, [])
 
-  return { start, stop, recording, analyzing, analyserRef, error }
+  return { start, stop, recording, analyzing, analyserRef, error, elapsedSeconds }
 }

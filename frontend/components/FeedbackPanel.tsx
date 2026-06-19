@@ -144,7 +144,7 @@ function StructuredAnalysis({ analysis }: { analysis: FeedbackAnalysis }) {
   const sections = [
     {
       icon: "↑",
-      label: "Expand on this",
+      label: "Mention more",
       text: analysis.expand,
       bg: "rgba(16,185,129,0.05)",
       border: "rgba(16,185,129,0.2)",
@@ -153,7 +153,7 @@ function StructuredAnalysis({ analysis }: { analysis: FeedbackAnalysis }) {
     },
     {
       icon: "↓",
-      label: "Say less about this",
+      label: "Mention less",
       text: analysis.cut,
       bg: "rgba(239,68,68,0.05)",
       border: "rgba(239,68,68,0.2)",
@@ -162,13 +162,31 @@ function StructuredAnalysis({ analysis }: { analysis: FeedbackAnalysis }) {
     },
     {
       icon: "★",
-      label: "Must mention (FAANG standard)",
+      label: "Must mention",
       text: analysis.must_mention,
       bg: "rgba(99,102,241,0.05)",
       border: "rgba(99,102,241,0.2)",
       labelColor: "#4f46e5",
       textColor: "#312e81",
     },
+    ...(analysis.pace ? [{
+      icon: "◎",
+      label: "Speaking pace",
+      text: analysis.pace,
+      bg: "rgba(14,165,233,0.05)",
+      border: "rgba(14,165,233,0.2)",
+      labelColor: "#0284c7",
+      textColor: "#0c4a6e",
+    }] : []),
+    ...(analysis.framing ? [{
+      icon: "✎",
+      label: "Word choice & framing",
+      text: analysis.framing,
+      bg: "rgba(245,158,11,0.05)",
+      border: "rgba(245,158,11,0.2)",
+      labelColor: "#d97706",
+      textColor: "#78350f",
+    }] : []),
     {
       icon: "⊞",
       label: "Structure (STAR method)",

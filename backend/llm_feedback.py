@@ -20,6 +20,7 @@ def get_groq_client() -> AsyncOpenAI | None:
 def _basic_feedback(transcript: str, features: dict) -> str:
     wpm = features.get("wpm", 0)
     filler_rate = features.get("filler_rate", 0)
+    filler_words_used = features.get("filler_words", [])
     structure = "Use the STAR method: open with the Situation, define your Task, detail your Actions specifically, then quantify the Result."
 
     if not transcript.strip():
@@ -28,27 +29,31 @@ def _basic_feedback(transcript: str, features: dict) -> str:
             "cut": "N/A",
             "must_mention": "Quantified results — top candidates always include metrics (%, $, time saved).",
             "structure": structure,
+            "pace": "No audio captured. Aim for 130–150 WPM — conversational but deliberate.",
+            "framing": "Use active language and own your contributions: say 'I built...' not 'we kind of put together...'",
             "overall": "Check your microphone setup and try again.",
         })
 
-    pace = ""
     if wpm < 100:
-        pace = "Speak slightly faster — your pace is below the natural interview rhythm of 130–150 WPM."
+        pace_advice = f"You spoke at {wpm:.0f} WPM — below the ideal range of 130–150 WPM. Slow answers can signal low energy or uncertainty. Practice speeding up slightly and using deliberate pauses only after key points."
     elif wpm > 180:
-        pace = "Slow down — at your pace interviewers struggle to absorb the key points."
+        pace_advice = f"You spoke at {wpm:.0f} WPM — too fast. Interviewers struggle to absorb key points at this pace. Slow to 130–150 WPM, and pause for 1–2 seconds after delivering your result to let it land."
     else:
-        pace = "Your speaking pace is good. Focus on depth and clarity of content."
+        pace_advice = f"Your pace of {wpm:.0f} WPM is solid (ideal: 130–150 WPM). Now focus on deliberate pauses after key statements — silence signals confidence and gives interviewers time to absorb what you said."
 
-    cut = "Avoid lengthy background context before getting to the action — interviewers want to hear what YOU did."
+    cut_advice = "Avoid lengthy background context before getting to your action — interviewers want to hear what YOU did, not a preamble."
     if filler_rate > 0.08:
-        cut = f"Reduce filler words (used {filler_rate*100:.0f}% of the time) — use a deliberate pause instead."
+        filler_str = ", ".join(list(dict.fromkeys(filler_words_used))[:4]) if filler_words_used else "filler words"
+        cut_advice = f"Reduce filler words like '{filler_str}' (appearing {filler_rate*100:.0f}% of the time). Replace every 'um' or 'like' with a brief, silent pause — confident pausing beats filler every time."
 
     return json.dumps({
-        "expand": "Add specific metrics and outcomes — numbers make your answer memorable and credible.",
-        "cut": cut,
-        "must_mention": "Quantified results and the direct business or team impact of your actions.",
+        "expand": "Add specific metrics and concrete outcomes — numbers are what make an answer memorable and credible to interviewers.",
+        "cut": cut_advice,
+        "must_mention": "Quantified results and the direct business or team impact of your actions. Top candidates always include at least one number.",
         "structure": structure,
-        "overall": pace,
+        "pace": pace_advice,
+        "framing": "Strengthen your ownership language: replace 'I helped with...' with 'I led...'; replace 'we tried to...' with 'I drove...'; replace vague outcomes like 'it went well' with specific results. Speak in first person and claim your contributions.",
+        "overall": "Add one concrete metric to your answer — quantified results are what separate strong candidates from forgettable ones.",
     })
 
 
@@ -80,23 +85,27 @@ async def get_llm_feedback(transcript: str, features: dict, question: str = "") 
     filler_list = ", ".join(set(filler_words)) if filler_words else "none"
     question_ctx = f'Interview question: "{question}"\n\n' if question else ""
 
-    prompt = f"""You are a senior interviewer at a top-tier tech company (Google, Meta, Amazon, Apple, Microsoft).
-Analyze this interview answer using the same criteria that separates offers from rejections at FAANG companies.
+    prompt = f"""You are a senior interviewer and communication coach at a top-tier company (Google, Meta, Amazon, Apple, Microsoft).
+Analyze this interview answer with the same rigor used to separate offer-worthy responses from rejections.
 
 {question_ctx}Candidate's answer:
 "{transcript}"
 
 Speech metrics: {wpm:.0f} WPM | {filler_rate*100:.1f}% filler words ({filler_list}) | {word_count} words total
 
-Give SPECIFIC, ACTIONABLE feedback grounded in what the best candidates actually do. Be direct and honest.
+Benchmarks: Ideal pace is 130–150 WPM. Filler rate should be under 3%. Strong answers run 150–250 words.
+
+Give SPECIFIC, HONEST coaching. Reference exact phrases from the answer when possible. Be direct — name what they said, what was missing, and how to fix it.
 
 Return ONLY this JSON object (no markdown, no explanation):
 {{
-  "expand": "What specific detail, metric, or aspect did they gloss over that top candidates always go deep on? Name it precisely.",
-  "cut": "What specific part was too vague, too long, or added no value? Be exact.",
-  "must_mention": "What concept, framework, quantified result, or evidence do the strongest candidates always include that this answer missed?",
-  "structure": "Did they use STAR (Situation/Task/Action/Result) effectively? What one structural change would make the biggest impact?",
-  "overall": "The single most important thing to change before their real interview. One direct, specific sentence."
+  "expand": "What specific detail, story beat, or metric did they gloss over? Name the exact moment in their answer and what they should have added.",
+  "cut": "What specific part added no value or buried the lead? Quote or paraphrase it and explain exactly why it weakened the answer.",
+  "must_mention": "What concept, quantified result, framework, or evidence do the strongest candidates always include that this answer missed? Be specific.",
+  "structure": "How well did they use STAR (Situation/Task/Action/Result)? Which element was weakest, and what one structural change would have the biggest impact?",
+  "pace": "Their pace was {wpm:.0f} WPM (ideal: 130–150 WPM). What does this mean for how interviewers perceive them? Give specific advice: when to slow down, where to insert a deliberate pause, and how pace affects perceived confidence.",
+  "framing": "What specific word choices or phrasing weakened their answer? Give 1–2 concrete rewrites in the format 'instead of [their phrase], say [stronger version]'. Focus on ownership language, active voice, and impact framing.",
+  "overall": "The single most critical change they need to make before their real interview. One direct, specific sentence."
 }}"""
 
     try:
@@ -104,7 +113,7 @@ Return ONLY this JSON object (no markdown, no explanation):
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=600,
+            max_tokens=900,
         )
         raw = (response.choices[0].message.content or "").strip()
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
@@ -112,7 +121,7 @@ Return ONLY this JSON object (no markdown, no explanation):
         raw = raw.strip()
         # Validate it's parseable JSON with our expected keys
         parsed = json.loads(raw)
-        if all(k in parsed for k in ("expand", "cut", "must_mention", "structure", "overall")):
+        if all(k in parsed for k in ("expand", "cut", "must_mention", "structure", "pace", "framing", "overall")):
             return raw
     except Exception as e:
         print(f"Groq feedback error: {e}")

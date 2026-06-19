@@ -74,7 +74,10 @@ export default function InterviewPage() {
     setViewingAnalysisFor(qIdx)
   }, [activeQuestion])
 
-  const { start, stop, recording, analyzing, analyserRef, error } = useAudioCapture(token, handleSegment)
+  const { start, stop, recording, analyzing, analyserRef, error, elapsedSeconds } = useAudioCapture(token, handleSegment)
+
+  const formatTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`
 
   const generateQuestions = useCallback(async () => {
     if (!token) return
@@ -316,29 +319,43 @@ export default function InterviewPage() {
               {!recording ? (
                 <button
                   onClick={() => start(questions[activeQuestion] || "", activeQuestion)}
-                  disabled={questions.length === 0}
+                  disabled={questions.length === 0 || analyzing}
                   style={{
                     flex: 1, padding: "13px",
-                    background: questions.length === 0 ? "#d1d5db" : "#111",
+                    background: questions.length === 0 || analyzing ? "#d1d5db" : "#111",
                     color: "#fff", border: "none", borderRadius: "10px",
                     fontSize: "14px", fontWeight: 600,
-                    cursor: questions.length === 0 ? "not-allowed" : "pointer",
+                    cursor: questions.length === 0 || analyzing ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                   }}
                 >
-                  {questionAnswers[activeQuestion] ? "Re-record answer" : "Start recording"}
+                  {analyzing && (
+                    <span style={{ width: "14px", height: "14px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
+                  )}
+                  {analyzing ? "Analyzing…" : questionAnswers[activeQuestion] ? "Re-record answer" : "Start recording"}
                 </button>
               ) : (
                 <button
                   onClick={stop}
-                  style={{ flex: 1, padding: "13px", background: "none", color: "#ef4444", border: "1px solid rgba(239,68,68,0.4)", borderRadius: "10px", fontSize: "14px", fontWeight: 600, cursor: "pointer" }}
+                  style={{
+                    flex: 1, padding: "13px",
+                    background: "none", color: "#ef4444",
+                    border: "1.5px solid rgba(239,68,68,0.5)", borderRadius: "10px",
+                    fontSize: "14px", fontWeight: 600, cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                  }}
                 >
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#ef4444", display: "inline-block", animation: "blink 1s ease-in-out infinite", flexShrink: 0 }} />
                   Stop recording
+                  <span style={{ fontFamily: "monospace", fontSize: "13px", color: "#ef4444", opacity: 0.85 }}>
+                    {formatTime(elapsedSeconds)}
+                  </span>
                 </button>
               )}
             </div>
             {recording && (
               <p style={{ fontSize: "12px", color: "#6b7280", textAlign: "center", margin: 0 }}>
-                Answering question {activeQuestion + 1}… Click Stop when done — analysis appears on the right.
+                Recording question {activeQuestion + 1} — take your time, click Stop whenever you&apos;re done.
               </p>
             )}
             {error && (
