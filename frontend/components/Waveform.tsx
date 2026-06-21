@@ -23,7 +23,7 @@ export default function Waveform({ analyserRef, active }: Props) {
       ctx.clearRect(0, 0, w, h)
 
       if (!analyser || !active) {
-        ctx.strokeStyle = "rgba(99,102,241,0.18)"
+        ctx.strokeStyle = "rgba(234,88,12,0.20)"
         ctx.lineWidth = 1.5
         ctx.beginPath()
         ctx.moveTo(0, h / 2)
@@ -35,10 +35,10 @@ export default function Waveform({ analyserRef, active }: Props) {
       const buffer = new Uint8Array(analyser.frequencyBinCount)
       analyser.getByteTimeDomainData(buffer)
 
-      ctx.strokeStyle = "#6366f1"
+      ctx.strokeStyle = "#ea580c"
       ctx.lineWidth   = 2
-      ctx.shadowColor = "#818cf8"
-      ctx.shadowBlur  = 8
+      ctx.shadowColor = "#f97316"
+      ctx.shadowBlur  = 10
       ctx.beginPath()
       buffer.forEach((val, i) => {
         const x = (i / buffer.length) * w

@@ -5,110 +5,101 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-space: 'Space Grotesk', sans-serif;
+  --font-space:   'Space Grotesk', sans-serif;
   --font-dm-mono: 'DM Mono', monospace;
-  --bg: #aed9ee;
-  --accent: #2563eb;
-  --border: rgba(14, 60, 140, 0.14);
+
+  /* Warm glass palette */
+  --glass-bg:          rgba(255, 255, 255, 0.58);
+  --glass-bg-strong:   rgba(255, 255, 255, 0.72);
+  --glass-border:      rgba(255, 255, 255, 0.65);
+  --glass-shadow:      0 4px 24px rgba(180, 60, 10, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04);
+
+  --accent:       #ea580c;
+  --accent-dark:  #c2410c;
+  --accent-light: rgba(234, 88, 12, 0.10);
+  --accent-border:rgba(234, 88, 12, 0.30);
+
+  --text-heading: #1c0800;
+  --text-body:    #44200a;
+  --text-muted:   #8a6050;
+  --border-warm:  rgba(200, 100, 50, 0.18);
 }
 
 body {
-  background: var(--bg);
-  color: #0d2b4a;
+  background: transparent;
+  color: var(--text-heading);
+  font-family: var(--font-space), sans-serif;
 }
 
-/* Glassmorphism card */
+/* ── Glassmorphism ────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.50);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  box-shadow:
-    0 4px 32px rgba(0, 60, 140, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 8px 48px rgba(0, 60, 140, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 40px rgba(180, 60, 10, 0.09), 0 1px 4px rgba(0,0,0,0.04);
 }
 
-/* Input focus glow */
-.input-blue {
+/* ── Inputs ───────────────────────────────────────────── */
+.input-warm {
   background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(14, 80, 160, 0.18);
-  color: #0d2b4a;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.input-blue::placeholder {
-  color: rgba(14, 80, 160, 0.35);
-}
-.input-blue:focus {
+  border: 1.5px solid var(--border-warm);
+  color: var(--text-heading);
+  transition: border-color 0.18s, box-shadow 0.18s;
   outline: none;
-  border-color: rgba(37, 99, 235, 0.5);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+.input-warm::placeholder { color: rgba(180, 100, 50, 0.38); }
+.input-warm:focus {
+  border-color: rgba(234, 88, 12, 0.5);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.10);
 }
 
-/* Accent button */
-.btn-accent {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: #ffffff;
+/* ── Buttons ──────────────────────────────────────────── */
+.btn-primary {
+  background: rgba(28, 10, 0, 0.88);
+  color: #fff;
   font-weight: 700;
-  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.30);
+  border: none;
+  transition: opacity 0.18s, transform 0.14s, box-shadow 0.18s;
+  box-shadow: 0 4px 18px rgba(28, 10, 0, 0.22);
 }
-.btn-accent:hover {
-  opacity: 0.92;
-  box-shadow: 0 6px 28px rgba(37, 99, 235, 0.45);
-}
-.btn-accent:active {
-  transform: scale(0.97);
-}
-.btn-accent:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  box-shadow: none;
-}
+.btn-primary:hover  { opacity: 0.88; box-shadow: 0 6px 26px rgba(28, 10, 0, 0.30); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
-/* Ghost button */
 .btn-ghost {
   background: rgba(255, 255, 255, 0.55);
-  color: rgba(14, 60, 140, 0.80);
-  border: 1px solid rgba(14, 60, 140, 0.18);
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  color: rgba(44, 20, 0, 0.75);
+  border: 1px solid rgba(200, 100, 50, 0.20);
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
 }
 .btn-ghost:hover {
-  color: #1d4ed8;
-  border-color: rgba(29, 78, 216, 0.40);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(234, 88, 12, 0.35);
+  color: var(--accent-dark);
 }
 
-/* Section label */
+/* ── Labels ───────────────────────────────────────────── */
 .label-mono {
   font-size: 0.65rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(14, 60, 140, 0.55);
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
+/* ── Scrollbar ────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.25); border-radius: 2px; }
-
-/* Cursor ripple dot that follows mouse */
-#cursor-glow {
-  position: fixed;
-  pointer-events: none;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
-  transform: translate(-50%, -50%);
-  transition: left 0.08s linear, top 0.08s linear;
-  z-index: 1;
+::-webkit-scrollbar-thumb {
+  background: rgba(234, 88, 12, 0.22);
+  border-radius: 2px;
 }

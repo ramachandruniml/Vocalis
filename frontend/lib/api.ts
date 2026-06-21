@@ -16,6 +16,22 @@ async function authFetch(path: string, token: string, options: RequestInit = {})
   return res.json()
 }
 
+export interface SaveSegment {
+  transcript: string
+  confidence: number
+  wpm: number
+  fillerRate: number
+  fillerWords: string[]
+  uniqueWordRatio: number
+  feedback: string
+}
+
+export const saveSession = (token: string, segments: SaveSegment[]) =>
+  authFetch("/api/sessions", token, {
+    method: "POST",
+    body: JSON.stringify({ segments }),
+  })
+
 export const getSessions = (token: string) =>
   authFetch("/api/sessions", token)
 

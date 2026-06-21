@@ -8,6 +8,20 @@ interface Props {
   loading:  boolean
 }
 
+const inputStyle: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  padding: "12px 16px",
+  border: "1.5px solid rgba(200,100,50,0.18)",
+  borderRadius: "10px",
+  fontSize: "14px",
+  color: "#1c0800",
+  background: "rgba(255,255,255,0.72)",
+  outline: "none",
+  transition: "border-color 0.16s, box-shadow 0.16s",
+  boxSizing: "border-box",
+}
+
 export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
   const [mode, setMode]         = useState<"login" | "register">("login")
   const [email, setEmail]       = useState("")
@@ -23,7 +37,7 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
     <div style={{
       minHeight: "100vh",
       padding: "24px",
-      background: "#f5f5f7",
+      background: "transparent",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -31,22 +45,25 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
       <div style={{
         width: "100%",
         maxWidth: "440px",
-        background: "#ffffff",
+        background: "rgba(255,255,255,0.62)",
+        backdropFilter: "blur(22px)",
+        WebkitBackdropFilter: "blur(22px)",
         borderRadius: "20px",
         overflow: "hidden",
-        boxShadow: "0 4px 48px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)",
+        border: "1px solid rgba(255,255,255,0.72)",
+        boxShadow: "0 8px 48px rgba(180,60,10,0.12), 0 2px 8px rgba(0,0,0,0.05)",
       }}>
-        {/* Grid-pattern header */}
+        {/* Warm gradient header */}
         <div style={{
           position: "relative",
           height: "108px",
           overflow: "hidden",
-          background: "linear-gradient(180deg, rgba(199,210,254,0.65) 0%, rgba(224,231,255,0.28) 55%, rgba(255,255,255,0) 100%)",
+          background: "linear-gradient(160deg, rgba(249,115,22,0.22) 0%, rgba(251,113,133,0.14) 55%, rgba(255,255,255,0) 100%)",
         }}>
           <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }} xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="auth-grid" width="44" height="44" patternUnits="userSpaceOnUse">
-                <path d="M 44 0 L 0 0 0 44" fill="none" stroke="rgba(99,102,241,0.15)" strokeWidth="1"/>
+                <path d="M 44 0 L 0 0 0 44" fill="none" stroke="rgba(234,88,12,0.12)" strokeWidth="1"/>
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#auth-grid)" />
@@ -60,14 +77,14 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px" }}>
               <svg width="32" height="22" viewBox="0 0 32 22" aria-hidden>
-                <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#4f46e5"/>
+                <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#ea580c"/>
               </svg>
-              <span style={{ fontWeight: 600, fontSize: "18px", color: "#111" }}>Vocalis</span>
+              <span style={{ fontWeight: 700, fontSize: "18px", color: "#1c0800" }}>Vocalis</span>
             </div>
-            <h1 style={{ fontSize: "30px", fontWeight: 700, lineHeight: 1.2, color: "#0d0d0d", margin: "0 0 8px" }}>
+            <h1 style={{ fontSize: "30px", fontWeight: 700, lineHeight: 1.2, color: "#1c0800", margin: "0 0 8px" }}>
               {mode === "login" ? "Welcome back" : "Create account"}
             </h1>
-            <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+            <p style={{ fontSize: "14px", color: "#7a4020", margin: 0 }}>
               {mode === "login"
                 ? "Please enter your details to sign in"
                 : "Sign up to start your interview prep"}
@@ -83,12 +100,13 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
               style={{
                 width: "52px", height: "52px",
                 borderRadius: "50%",
-                border: "1.5px solid #e5e7eb",
-                background: "#fff",
+                border: "1.5px solid rgba(200,100,50,0.22)",
+                background: "rgba(255,255,255,0.78)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: loading ? "not-allowed" : "pointer",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                boxShadow: "0 2px 8px rgba(180,60,10,0.08)",
                 opacity: loading ? 0.4 : 1,
+                transition: "box-shadow 0.16s, border-color 0.16s",
               }}
               title="Continue with Google"
             >
@@ -103,17 +121,16 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
 
           {/* OR divider */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-            <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
-            <span style={{ fontSize: "13px", fontWeight: 500, color: "#9ca3af" }}>OR</span>
-            <div style={{ flex: 1, height: "1px", background: "#e5e7eb" }} />
+            <div style={{ flex: 1, height: "1px", background: "rgba(200,100,50,0.18)" }} />
+            <span style={{ fontSize: "13px", fontWeight: 500, color: "#9a6040" }}>OR</span>
+            <div style={{ flex: 1, height: "1px", background: "rgba(200,100,50,0.18)" }} />
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
 
-            {/* Email */}
             <div>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#0d0d0d", marginBottom: "8px" }}>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#1c0800", marginBottom: "8px" }}>
                 Your Email Address
               </label>
               <input
@@ -123,27 +140,14 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
                 placeholder="Your Email Address"
                 required
                 autoComplete="email"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  padding: "12px 16px",
-                  border: "1.5px solid #e5e7eb",
-                  borderRadius: "10px",
-                  fontSize: "14px",
-                  color: "#0d0d0d",
-                  background: "#fff",
-                  outline: "none",
-                  transition: "border-color 0.15s",
-                  boxSizing: "border-box",
-                }}
-                onFocus={e  => (e.target.style.borderColor = "#6366f1")}
-                onBlur={e   => (e.target.style.borderColor = "#e5e7eb")}
+                style={inputStyle}
+                onFocus={e  => { e.target.style.borderColor = "rgba(234,88,12,0.5)"; e.target.style.boxShadow = "0 0 0 3px rgba(234,88,12,0.10)" }}
+                onBlur={e   => { e.target.style.borderColor = "rgba(200,100,50,0.18)"; e.target.style.boxShadow = "none" }}
               />
             </div>
 
-            {/* Password */}
             <div>
-              <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#0d0d0d", marginBottom: "8px" }}>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#1c0800", marginBottom: "8px" }}>
                 Password
               </label>
               <div style={{ position: "relative" }}>
@@ -155,28 +159,16 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
                   required
                   minLength={8}
                   autoComplete={mode === "login" ? "current-password" : "new-password"}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    padding: "12px 44px 12px 16px",
-                    border: "1.5px solid #e5e7eb",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    color: "#0d0d0d",
-                    background: "#fff",
-                    outline: "none",
-                    transition: "border-color 0.15s",
-                    boxSizing: "border-box",
-                  }}
-                  onFocus={e  => (e.target.style.borderColor = "#6366f1")}
-                  onBlur={e   => (e.target.style.borderColor = "#e5e7eb")}
+                  style={{ ...inputStyle, padding: "12px 44px 12px 16px" }}
+                  onFocus={e  => { e.target.style.borderColor = "rgba(234,88,12,0.5)"; e.target.style.boxShadow = "0 0 0 3px rgba(234,88,12,0.10)" }}
+                  onBlur={e   => { e.target.style.borderColor = "rgba(200,100,50,0.18)"; e.target.style.boxShadow = "none" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(s => !s)}
                   style={{
                     position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
-                    background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: "4px", lineHeight: 0,
+                    background: "none", border: "none", cursor: "pointer", color: "#9a6040", padding: "4px", lineHeight: 0,
                   }}
                 >
                   {showPass ? (
@@ -194,16 +186,15 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
               </div>
             </div>
 
-            {/* Remember me + Forgot password (login only) */}
             {mode === "login" && (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "-4px" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#4b5563", cursor: "pointer", userSelect: "none" }}>
-                  <input type="checkbox" style={{ width: "14px", height: "14px", accentColor: "#111" }}/>
+                <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "14px", color: "#5c3012", cursor: "pointer", userSelect: "none" }}>
+                  <input type="checkbox" style={{ width: "14px", height: "14px", accentColor: "#ea580c" }}/>
                   Remember me
                 </label>
                 <button
                   type="button"
-                  style={{ fontSize: "14px", fontWeight: 600, color: "#0d0d0d", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "2px" }}
+                  style={{ fontSize: "14px", fontWeight: 600, color: "#1c0800", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", textUnderlineOffset: "2px" }}
                 >
                   Forgot password?
                 </button>
@@ -216,17 +207,14 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
               </p>
             )}
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
               style={{
                 width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: "flex", alignItems: "center", justifyContent: "center",
                 padding: "14px",
-                background: "#111111",
+                background: "rgba(28,10,0,0.88)",
                 color: "#fff",
                 border: "none",
                 borderRadius: "10px",
@@ -236,6 +224,8 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
                 cursor: loading ? "not-allowed" : "pointer",
                 opacity: loading ? 0.5 : 1,
                 marginTop: "4px",
+                boxShadow: "0 4px 18px rgba(28,10,0,0.22)",
+                transition: "opacity 0.16s, box-shadow 0.16s",
               }}
             >
               {loading
@@ -244,19 +234,19 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
             </button>
           </form>
 
-          {/* Toggle login / register */}
-          <p style={{ fontSize: "14px", textAlign: "center", marginTop: "20px", color: "#6b7280" }}>
+          <p style={{ fontSize: "14px", textAlign: "center", marginTop: "20px", color: "#7a4020" }}>
             {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               type="button"
               onClick={() => setMode(mode === "login" ? "register" : "login")}
-              style={{ fontWeight: 700, color: "#0d0d0d", background: "none", border: "none", cursor: "pointer", fontSize: "inherit" }}
+              style={{ fontWeight: 700, color: "#1c0800", background: "none", border: "none", cursor: "pointer", fontSize: "inherit" }}
             >
               {mode === "login" ? "Sign up" : "Sign in"}
             </button>
           </p>
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
 }
