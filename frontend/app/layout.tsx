@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         style={{
           background: "transparent",
           color: "#0d0d0d",
-          fontFamily: "var(--font-space), sans-serif",
+          fontFamily: "var(--font-body), serif",
         }}
       >
         <MeshBackground />

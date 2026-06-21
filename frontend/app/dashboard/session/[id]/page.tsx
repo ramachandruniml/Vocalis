@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { getSession } from "@/lib/api"
+import VocalisLogo from "@/components/VocalisLogo"
 import type { FeedbackAnalysis } from "@/types"
 
 /* ── Types for DB session data ─────────────────────────────── */
@@ -84,23 +85,23 @@ export default function SessionDetailPage() {
         top: 0, left: 0, right: 0,
         zIndex: 50,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <svg width="28" height="20" viewBox="0 0 32 22" aria-hidden>
-            <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#ea580c"/>
-          </svg>
-          <span style={{ fontWeight: 700, fontSize: "16px", color: "#1c0800" }}>Vocalis</span>
-        </div>
+        <VocalisLogo iconHeight={40} wordmarkSize={20} />
         <button
           onClick={() => router.push("/dashboard")}
           style={{
-            fontSize: "13px", fontWeight: 500, color: "#5c3012",
+            fontSize: "16px", fontWeight: 600, color: "#5c3012",
             background: "rgba(255,255,255,0.6)",
             border: "1px solid rgba(200,100,50,0.22)",
-            borderRadius: "8px", padding: "6px 14px", cursor: "pointer",
+            borderRadius: "10px", padding: "9px 22px", cursor: "pointer",
             backdropFilter: "blur(8px)",
           }}
         >
-          ← Back to dashboard
+          <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Back to dashboard
+          </span>
         </button>
       </header>
 

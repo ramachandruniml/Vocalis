@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/useAuth"
 import { useAudioCapture } from "@/hooks/useAudioCapture"
+import VocalisLogo from "@/components/VocalisLogo"
 import { getInterviewQuestions, saveSession } from "@/lib/api"
 import type { SaveSegment } from "@/lib/api"
 import Waveform from "@/components/Waveform"
@@ -136,10 +137,7 @@ export default function InterviewPage() {
         zIndex: 50,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <svg width="28" height="20" viewBox="0 0 32 22" aria-hidden>
-            <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#ea580c"/>
-          </svg>
-          <span style={{ fontWeight: 700, fontSize: "16px", color: "#1c0800" }}>Vocalis</span>
+          <VocalisLogo iconHeight={40} wordmarkSize={20} />
           {recording && (
             <span style={{ fontSize: "12px", color: "#ef4444", display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block", animation: "blink 1s ease-in-out infinite" }} />
@@ -178,15 +176,22 @@ export default function InterviewPage() {
               router.push("/dashboard")
             }}
             style={{
-              fontSize: "13px", fontWeight: 500, color: "#5c3012",
+              fontSize: "16px", fontWeight: 600, color: "#5c3012",
               background: "rgba(255,255,255,0.6)",
               border: "1px solid rgba(200,100,50,0.22)",
-              borderRadius: "8px", padding: "6px 14px", cursor: saving ? "wait" : "pointer",
+              borderRadius: "10px", padding: "9px 22px", cursor: saving ? "wait" : "pointer",
               backdropFilter: "blur(8px)",
               opacity: saving ? 0.7 : 1,
             }}
           >
-            {saving ? "Saving…" : "Back to dashboard"}
+            {saving ? "Saving…" : (
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                Back to dashboard
+              </span>
+            )}
           </button>
         </div>
       </header>

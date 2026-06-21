@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import VocalisLogo from "@/components/VocalisLogo"
 import { useAuth } from "@/hooks/useAuth"
 import { getSessions } from "@/lib/api"
 import SessionHistory from "@/components/SessionHistory"
@@ -61,21 +62,16 @@ export default function Dashboard() {
         top: 0, left: 0, right: 0,
         zIndex: 50,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <svg width="28" height="20" viewBox="0 0 32 22" aria-hidden>
-            <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#ea580c"/>
-          </svg>
-          <span style={{ fontWeight: 700, fontSize: "16px", color: "#1c0800" }}>Vocalis</span>
-        </div>
+        <VocalisLogo iconHeight={40} wordmarkSize={20} />
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <span style={{ fontSize: "13px", color: "#9a6040" }}>{user?.email}</span>
+          <span style={{ fontSize: "16px", color: "#9a6040" }}>{user?.email}</span>
           <button
             onClick={logout}
             style={{
-              fontSize: "13px", fontWeight: 500, color: "#5c3012",
+              fontSize: "16px", fontWeight: 600, color: "#5c3012",
               background: "rgba(255,255,255,0.6)",
               border: "1px solid rgba(200,100,50,0.22)",
-              borderRadius: "8px", padding: "6px 14px", cursor: "pointer",
+              borderRadius: "10px", padding: "9px 22px", cursor: "pointer",
               backdropFilter: "blur(8px)",
               transition: "background 0.16s, border-color 0.16s",
             }}

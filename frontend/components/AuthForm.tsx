@@ -1,5 +1,6 @@
 "use client"
 import { useState, type FormEvent } from "react"
+import VocalisLogo from "@/components/VocalisLogo"
 
 interface Props {
   onEmail:  (email: string, password: string, mode: "login" | "register") => void
@@ -75,11 +76,8 @@ export default function AuthForm({ onEmail, onGoogle, error, loading }: Props) {
 
           {/* Logo + title */}
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px" }}>
-              <svg width="32" height="22" viewBox="0 0 32 22" aria-hidden>
-                <path d="M 1 21 A 15 15 0 0 1 31 21 Z" fill="#ea580c"/>
-              </svg>
-              <span style={{ fontWeight: 700, fontSize: "18px", color: "#1c0800" }}>Vocalis</span>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+              <VocalisLogo iconHeight={110} wordmarkSize={32} stacked />
             </div>
             <h1 style={{ fontSize: "30px", fontWeight: 700, lineHeight: 1.2, color: "#1c0800", margin: "0 0 8px" }}>
               {mode === "login" ? "Welcome back" : "Create account"}

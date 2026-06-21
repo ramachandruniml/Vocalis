@@ -2,6 +2,8 @@
 
 AI-powered interview coaching app. Record yourself answering interview questions, get instant transcription, and receive detailed feedback on your delivery — pace, filler words, word choice, structure, and more.
 
+![Session detail view](screenshots/session-detail.png)
+
 ---
 
 ## Features
