@@ -185,7 +185,7 @@ async def connect_db():
         ASYNC_DATABASE_URL,
         echo=False,
         future=True,
-        connect_args={"statement_cache_size": 0} if is_pg else {},
+        connect_args={"statement_cache_size": 0, "prepared_statement_cache_size": 0} if is_pg else {},
     )
     AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with engine.begin() as conn:
