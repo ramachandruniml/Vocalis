@@ -180,18 +180,23 @@ async def connect_db():
     if engine is not None:
         return
 
-    is_pg = ASYNC_DATABASE_URL.startswith("postgresql")
+    url = ASYNC_DATABASE_URL
+    if url.startswith("postgresql"):
+        # Add statement_cache_size=0 directly to the URL for pgbouncer compatibility
+        separator = "&" if "?" in url else "?"
+        url = f"{url}{separator}prepared_statement_cache_size=0&statement_cache_size=0"
+
     engine = create_async_engine(
-        ASYNC_DATABASE_URL,
+        url,
         echo=False,
         future=True,
-        connect_args={"statement_cache_size": 0, "prepared_statement_cache_size": 0} if is_pg else {},
+        execution_options={"compiled_cache": None},
     )
     AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-
+        
 async def disconnect_db():
     if engine:
         await engine.dispose()
