@@ -95,17 +95,17 @@ Speech metrics: {wpm:.0f} WPM | {filler_rate*100:.1f}% filler words ({filler_lis
 
 Benchmarks: Ideal pace is 130–150 WPM. Filler rate should be under 3%. Strong answers run 150–250 words.
 
-Give SPECIFIC, HONEST coaching. Reference exact phrases from the answer when possible. Be direct — name what they said, what was missing, and how to fix it.
+Give SPECIFIC, HONEST coaching. Reference exact phrases from the answer when possible. Be direct — name what was said, what was missing, and how to fix it. Address the candidate directly using "you" and "your" throughout all feedback fields — never use "they", "them", or "their".
 
 Return ONLY this JSON object (no markdown, no explanation):
 {{
-  "expand": "What specific detail, story beat, or metric did they gloss over? Name the exact moment in their answer and what they should have added.",
-  "cut": "What specific part added no value or buried the lead? Quote or paraphrase it and explain exactly why it weakened the answer.",
-  "must_mention": "What concept, quantified result, framework, or evidence do the strongest candidates always include that this answer missed? Be specific.",
-  "structure": "How well did they use STAR (Situation/Task/Action/Result)? Which element was weakest, and what one structural change would have the biggest impact?",
-  "pace": "Their pace was {wpm:.0f} WPM (ideal: 130–150 WPM). What does this mean for how interviewers perceive them? Give specific advice: when to slow down, where to insert a deliberate pause, and how pace affects perceived confidence.",
-  "framing": "What specific word choices or phrasing weakened their answer? Give 1–2 concrete rewrites in the format 'instead of [their phrase], say [stronger version]'. Focus on ownership language, active voice, and impact framing.",
-  "overall": "The single most critical change they need to make before their real interview. One direct, specific sentence."
+  "expand": "What specific detail, story beat, or metric did you gloss over? Name the exact moment in your answer and what you should have added.",
+  "cut": "What specific part of your answer added no value or buried the lead? Quote or paraphrase it and explain exactly why it weakened your response.",
+  "must_mention": "What concept, quantified result, framework, or evidence do the strongest candidates always include that your answer missed? Be specific.",
+  "structure": "How well did you use STAR (Situation/Task/Action/Result)? Which element was weakest, and what one structural change would have the biggest impact on your answer?",
+  "pace": "Your pace was {wpm:.0f} WPM (ideal: 130–150 WPM). What does this mean for how interviewers perceive you? Give specific advice: when to slow down, where to insert a deliberate pause, and how your pace affects perceived confidence.",
+  "framing": "What specific word choices or phrasing weakened your answer? Give 1–2 concrete rewrites in the format 'instead of [that phrase], say [stronger version]'. Focus on ownership language, active voice, and impact framing.",
+  "overall": "The single most critical change you need to make before your real interview. One direct, specific sentence."
 }}"""
 
     try:

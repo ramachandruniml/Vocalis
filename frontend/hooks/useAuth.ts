@@ -7,6 +7,7 @@ import {
   signInWithEmail,
   logout,
   onAuthStateChanged,
+  getGoogleRedirectResult,
   type User,
 } from "@/lib/firebase"
 
@@ -30,6 +31,13 @@ export function useAuth() {
   const [error, setError]  = useState<string | null>(null)
 
   useEffect(() => {
+    // Complete any pending Google redirect sign-in
+    getGoogleRedirectResult().catch((e: any) => {
+      if (e?.code && e.code !== "auth/no-auth-event") {
+        setError(friendlyError(e))
+      }
+    })
+
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u)
       if (u) {

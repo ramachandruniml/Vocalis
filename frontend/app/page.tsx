@@ -30,7 +30,7 @@ export default function Home() {
       }
       onGoogle={signInWithGoogle}
       error={error}
-      loading={false}
+      loading={loading}
     />
   )
 }
