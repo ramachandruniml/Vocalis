@@ -7,7 +7,6 @@ import {
   signInWithEmail,
   logout,
   onAuthStateChanged,
-  getGoogleRedirectResult,
   type User,
 } from "@/lib/firebase"
 
@@ -21,7 +20,10 @@ function friendlyError(e: any): string {
   if (code === "auth/weak-password")          return "Password must be at least 6 characters."
   if (code === "auth/too-many-requests")      return "Too many attempts. Please try again later."
   if (code === "auth/network-request-failed") return "Network error. Check your connection."
-  return "Something went wrong. Please try again."
+  if (code === "auth/popup-blocked")          return "Popup was blocked — please allow popups for this site and try again."
+  if (code === "auth/popup-closed-by-user")   return "Sign-in popup was closed. Please try again."
+  if (code === "auth/cancelled-popup-request") return ""
+  return code ? `Sign-in error (${code}). Please try again.` : "Something went wrong. Please try again."
 }
 
 export function useAuth() {
@@ -31,13 +33,6 @@ export function useAuth() {
   const [error, setError]  = useState<string | null>(null)
 
   useEffect(() => {
-    // Complete any pending Google redirect sign-in
-    getGoogleRedirectResult().catch((e: any) => {
-      if (e?.code && e.code !== "auth/no-auth-event") {
-        setError(friendlyError(e))
-      }
-    })
-
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u)
       if (u) {
