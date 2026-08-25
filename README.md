@@ -37,7 +37,7 @@ AI-powered interview coaching app. Record yourself answering interview questions
 - **Firebase Admin SDK** — server-side token verification
 - **Groq API**
   - `whisper-large-v3-turbo` — audio transcription
-  - `llama-3.3-70b-versatile` — feedback generation
+  - `openai/gpt-oss-120b` — feedback generation
 - **slowapi** — rate limiting
 - **scikit-learn / numpy** — speech feature extraction
 

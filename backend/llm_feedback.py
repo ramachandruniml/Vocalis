@@ -110,10 +110,11 @@ Return ONLY this JSON object (no markdown, no explanation):
 
     try:
         response = await client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
-            max_tokens=900,
+            max_tokens=1500,
+            reasoning_effort="low",
         )
         raw = (response.choices[0].message.content or "").strip()
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
@@ -884,10 +885,11 @@ Return ONLY a JSON array of {count} strings. No markdown, no numbering, no expla
 
     try:
         response = await client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.85,
-            max_tokens=1200,
+            max_tokens=1800,
+            reasoning_effort="low",
         )
         raw = response.choices[0].message.content or ""
         questions = [q.strip() for q in _parse_questions(raw) if isinstance(q, str) and q.strip()]
